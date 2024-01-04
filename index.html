@@ -37,7 +37,7 @@
     <script>
         document.getElementById('generateButton').addEventListener('click', function () {
             // Call the /generate_code endpoint
-            fetch('http://localhost:3000/generate_code')
+            fetch('generate_code')
                 .then(response => response.json())
                 .then(data => {
                     var generatedCode = data.code;
