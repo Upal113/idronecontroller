@@ -11,8 +11,11 @@ app.use(express.static(path.join(__dirname)));
 const io = socketIO(server, {
   cors: {
     origin: '*',
-  }
+  },
+  transports: ['websocket'], // Use only WebSocket transport
+  secure: true, // Enable secure (HTTPS) connections
 });
+
 
 const port = 3000;
 

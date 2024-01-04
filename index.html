@@ -41,7 +41,9 @@
                 .then(response => response.json())
                 .then(data => {
                     var generatedCode = data.code;
-                    const socketURL = `ws://idrone-controller.onrender.com/${generatedCode}`;
+                    // In your client-side JavaScript
+                    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                    const socketURL = `${protocol}idrone-controller.onrender.com/${generatedCode}`;
                     console.log(socketURL)
                     sessionStorage.setItem('socketURL', socketURL);
                     displayMessage('Generated code: ' + generatedCode);
