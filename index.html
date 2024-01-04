@@ -5,35 +5,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generate Page</title>
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .verification-box {
+            width: 80%;
+            max-width: 400px;
         }
 
         #messageArea {
-            height: 30vh;
+            padding: 15px;
+            font-size: 24px;
             border: 1px solid #ccc;
-            overflow-y: scroll;
-            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
         }
 
         #generateButton {
-            padding: 10px;
-            font-size: 16px;
+            padding: 20px;
+            font-size: 24px;
             cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .controller-button {
+            padding: 20px;
+            font-size: 24px;
             margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div id="messageArea"></div>
+    <div class="container text-center verification-box">
+        <h2 class="mb-4">Generate Code</h2>
+        <div id="messageArea" class="form-control" readonly></div>
+        <button class="btn btn-primary mt-3" id="generateButton">Generate Code</button>
+        <a href="/controller" class="btn btn-secondary controller-button mt-3">Verify the code and go to the Controller Page</a>
+    </div>
 
-    <button id="generateButton">Generate Code</button>
-    <a href="/controller">Verify the code and Put move to the Controller Page</a>
+    <!-- Add Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
         document.getElementById('generateButton').addEventListener('click', function () {
             // Call the /generate_code endpoint
@@ -51,10 +80,9 @@
 
         function displayMessage(message) {
             var messageArea = document.getElementById('messageArea');
-            var newMessage = document.createElement('p');
-            newMessage.textContent = message;
-            messageArea.appendChild(newMessage);
+            messageArea.textContent = message;
         }
     </script>
 </body>
+
 </html>
