@@ -53,16 +53,16 @@
                     position.y = Math.max(position.y - 1, 0);
                     break;
                 case 'left':
-                    position.x = Math.max(position.x - 1, -10);
+                    position.x = position.x - 1, -10;
                     break;
                 case 'right':
-                    position.x = Math.min(position.x + 1, 10);
+                    position.x = position.x + 1, 10;
                     break;
                 case 'forward':
-                    position.z = Math.max(position.z - 1, -10);
+                    position.z = position.z - 1, -10;
                     break;
                 case 'backward':
-                    position.z = Math.min(position.z + 1, 10);
+                    position.z = position.z + 1, 10;
                     break;
             }
 
