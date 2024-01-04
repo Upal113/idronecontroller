@@ -5,56 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Page</title>
-    <!-- Add Bootstrap CSS link -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f8f9fa;
-        }
-
-        .verification-box {
-            width: 80%;
-            max-width: 400px;
         }
 
         #verificationInput {
-            padding: 15px;
-            font-size: 30px; /* Increased font size */
-            margin-bottom: 10px;
-            width: 100%;
+            padding: 15px; /* Increased padding */
+            font-size: 20px; /* Increased font size */
+            margin-right: 10px;
+            width: 80px; /* Increased width */
         }
 
         #verifyButton {
             padding: 15px;
             font-size: 20px;
             cursor: pointer;
-            width: 100%;
-        }
-
-        #verificationMessage {
-            margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container text-center verification-box">
-        <h2 class="mb-4">Verification</h2>
-        <label for="verificationInput">Enter 6-digit number:</label>
-        <input type="text" class="form-control" id="verificationInput" maxlength="6">
-        <button class="btn btn-primary mt-3" id="verifyButton">Verify</button>
-        <div id="verificationMessage" class="mt-3"></div>
-    </div>
+    <label for="verificationInput">Enter 6-digit number:</label>
+    <input type="text" id="verificationInput" maxlength="6">
+    <button id="verifyButton">Verify</button>
 
-    <!-- Add Bootstrap JS and Popper.js -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <div id="verificationMessage"></div>
 
     <script>
         document.getElementById('verifyButton').addEventListener('click', function () {
