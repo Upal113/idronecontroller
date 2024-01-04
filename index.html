@@ -73,7 +73,7 @@
                     const socketURL = `wss://idrone-controller.onrender.com/code/socket/${generatedCode}`;
                     console.log(socketURL)
                     sessionStorage.setItem('socketURL', socketURL);
-                    displayMessage('Generated code: ' + generatedCode);
+                    displayMessage(generatedCode);
                 })
                 .catch(error => console.error('Error:', error));
         });
