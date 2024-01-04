@@ -39,42 +39,46 @@
             audio.loop = true;
 
             socket.on('message', text => {
-                console.log(text);
                 handleCommand(text);
             });
         } else {
             console.error('WebSocket URL not found in session storage.');
         }
-
-        function handleCommand(command) {
-            // Example: Move the drone based on the command
-            // You may need to use a library or API to control the drone's movement
-            switch (command) {
-                case 'up':
-                    position.y = Math.min(position.y + 1, 10);
-                    break;
-                case 'down':
-                    position.y = Math.max(position.y - 1, 0);
-                    // Check if the drone is on the ground
-                    if (position.y === 0) {
+        function play_sound(){
+            if (position.y === -2) {
                         // Stop playing the sound when the drone is on the ground
                         audio.pause();
                     } else {
                         // Continue playing the sound if the drone is not on the ground
                         audio.play();
                     }
+        }
+        function handleCommand(command) {
+            // Example: Move the drone based on the command
+            // You may need to use a library or API to control the drone's movement
+            switch (command) {
+                case 'up':
+                    position.y = Math.min(position.y + 1, 10);
+                    play_sound()
+                    break;
+                case 'down':
+                    position.y = Math.max(position.y - 1, -2);
+                    play_sound()
                     break;
                 case 'left':
-                    position.x = Math.max(position.x - 1, -10);
+                    position.x = position.x - 1;
+                    play_sound()
                     break;
                 case 'right':
-                    position.x = Math.min(position.x + 1, 10);
+                    position.x = position.x + 1, 10;
+                    play_sound()
                     break;
                 case 'forward':
-                    position.z = Math.max(position.z - 1, -10);
+                    position.z = position.z - 1, -10;
+                    play_sound()
                     break;
                 case 'backward':
-                    position.z = Math.min(position.z + 1, 10);
+                    position.z = position.z + 1, 10;
                     break;
             }
 
