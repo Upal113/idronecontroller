@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Drone Simulator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.7.1/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+</head>
+
+<body>
+    <a-scene id="myScene">
+        <a-entity environment="preset:arches;"></a-entity>
+        <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
+        <a-camera id="myCamera" position="0 -0.02 0">
+            <a-cursor intersection-spawn="event: click; mixin: voxel">
+                <a-image src="drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
+            </a-cursor>
+        </a-camera>
+        <a-box color="red" height="0.2" width="0.2" depth="0.1" position="0 -0.2 0"></a-box>
+    </a-scene>
+
+    <script>
+        var camera = document.getElementById('myCamera');
+        var position = camera.getAttribute('position');
+
+        // Get WebSocket URL from session storage
+        const socketURL = sessionStorage.getItem('socketURL');
+        console.log(socketURL)
+
+        // Check if socketURL exists before attempting to connect
+        if (socketURL) {
+            const socket = io(socketURL, {
+                transports: ['websocket'],
+            });
+
+            socket.on('message', text => {
+                console.log(text);
+                handleCommand(text);
+            });
+        } else {
+            console.error('WebSocket URL not found in session storage.');
+        }
+
+        function handleCommand(command) {
+            // Example: Move the drone based on the command
+            // You may need to use a library or API to control the drone's movement
+            switch (command) {
+                case 'up':
+                    position.y = Math.min(position.y + 1, 10);
+                    break;
+                case 'down':
+                    position.y = Math.max(position.y - 1, 0);
+                    break;
+                case 'left':
+                    position.x = Math.max(position.x - 1, -10);
+                    break;
+                case 'right':
+                    position.x = Math.min(position.x + 1, 10);
+                    break;
+                case 'forward':
+                    position.z = Math.max(position.z - 1, -10);
+                    break;
+                case 'backward':
+                    position.z = Math.min(position.z + 1, 10);
+                    break;
+            }
+
+            // Update camera position
+            camera.setAttribute('position', position);
+        }
+    </script>
+</body>
+
+</html>

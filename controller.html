@@ -86,7 +86,6 @@
     </div>
     <script>
                 const socketURL = sessionStorage.getItem('socketURL');
-                console.log(socketURL)
                 const socket = io(socketURL, {
                     transports: ['websocket'],
                 });

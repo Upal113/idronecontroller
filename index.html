@@ -37,12 +37,11 @@
     <script>
         document.getElementById('generateButton').addEventListener('click', function () {
             // Call the /generate_code endpoint
-            fetch('generate_code')
+            fetch('/generate_code')
                 .then(response => response.json())
                 .then(data => {
                     var generatedCode = data.code;
-                    // In your client-side JavaScript
-                    const socketURL = `https://idrone-controller.onrender.com/${generatedCode}`;
+                    const socketURL = `wss://lidrone-controller.onrender.com/code/socket/${generatedCode}`;
                     console.log(socketURL)
                     sessionStorage.setItem('socketURL', socketURL);
                     displayMessage('Generated code: ' + generatedCode);
@@ -58,5 +57,4 @@
         }
     </script>
 </body>
-
 </html>

@@ -11,11 +11,8 @@ app.use(express.static(path.join(__dirname)));
 const io = socketIO(server, {
   cors: {
     origin: '*',
-  },
-  transports: ['websocket'], // Use only WebSocket transport
-  secure: true, // Enable secure (HTTPS) connections
+  }
 });
-
 
 const port = 3000;
 
@@ -38,13 +35,9 @@ function initiateSocketConnection(verificationCode) {
 }
 
 app.get('/generate_code', (req, res) => {
-  if (!generatedCode) {
     generatedCode = generateSixDigitCode();
     initiateSocketConnection(generatedCode);
     res.json({ code: generatedCode });
-  } else {
-    res.status(400).json({ error: 'Code has already been generated. Use /verify endpoint to check the code.' });
-  }
 });
 
 app.post('/verify', (req, res) => {
@@ -73,4 +66,12 @@ app.get('/', (req, res) => {
 
 app.get('/controller', (req, res) => {
   res.sendFile(path.join(__dirname, 'controller.html'));
+});
+
+app.get('/verify', (req, res) => {
+  res.sendFile(path.join(__dirname, 'verify.html'));
+});
+
+app.get('/simulator', (req, res) => {
+  res.sendFile(path.join(__dirname, 'simulator.html'));
 });

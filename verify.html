@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #verificationInput {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        #verifyButton {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <label for="verificationInput">Enter 6-digit number:</label>
+    <input type="text" id="verificationInput" maxlength="6">
+    <button id="verifyButton">Verify</button>
+
+    <div id="verificationMessage"></div>
+
+    <script>
+        document.getElementById('verifyButton').addEventListener('click', function () {
+            const verificationCode = document.getElementById('verificationInput').value;
+
+            fetch('http://localhost:3000/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: verificationCode })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displayVerificationMessage(data.message);
+
+                    if (data.message === 'Code is valid!') {
+                        const socketURL = `ws://localhost:3000/code/socket/${verificationCode}`;
+                        sessionStorage.setItem('socketURL', socketURL);
+                        window.location.href = '/simulator';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayVerificationMessage('Error verifying the code.');
+                });
+        });
+
+        function displayVerificationMessage(message) {
+            var verificationMessage = document.getElementById('verificationMessage');
+            verificationMessage.textContent = message;
+        }
+    </script>
+</body>
+
+</html>
