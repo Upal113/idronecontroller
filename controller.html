@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Drone Controller</title>
+    <meta charset="UTF-8">
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .controller {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 50%;
+        }
+
+        .button {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            background-color: #3498db;
+            color: #fff;
+            border: 2px solid #2980b9;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+            margin-bottom: 10px; /* Add margin between buttons */
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        .picture-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drone-picture {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+        }
+
+        /* Add margin between Left and Right buttons */
+        #leftButton {
+            margin-right: 10px;
+        }
+
+        #rightButton {
+            margin-left: 10px;
+        }
+
+        /* Place Left and Right buttons on the same line */
+        .leftright-container {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="controller">
+        <div class="button" id="upButton">Up</div>
+        <div class="button" id="forwardButton">Forward</div>
+        <div class="leftright-container">
+            <div class="button" id="leftButton">Left</div>
+            <div class="button" id="rightButton">Right</div>
+        </div>
+        <div class="button" id="backwardButton">Backward</div>
+        <div class="button" id="downButton">Down</div>
+    </div>
+    <div class="picture-container">
+        <!-- Placeholder image, replace with your actual image source -->
+        <img src="drone.jpg" alt="Drone" class="drone-picture">
+    </div>
+    <script>
+                const socketURL = sessionStorage.getItem('socketURL');
+                const socket = io(socketURL, {
+                    transports: ['websocket'],
+                });
+
+                // WebSocket connection established callback
+                socket.on('connect', () => {
+                    console.log('WebSocket connection established');
+                });
+
+                // Event listeners for buttons
+                document.getElementById('upButton').addEventListener('click', () => {
+                    socket.emit('message', 'up');
+                });
+
+                document.getElementById('downButton').addEventListener('click', () => {
+                    socket.emit('message', 'down');
+                });
+
+                document.getElementById('leftButton').addEventListener('click', () => {
+                    socket.emit('message', 'left');
+                });
+
+                document.getElementById('rightButton').addEventListener('click', () => {
+                    socket.emit('message', 'right');
+                });
+
+                document.getElementById('forwardButton').addEventListener('click', () => {
+                    socket.emit('message', 'forward');
+                });
+
+                document.getElementById('backwardButton').addEventListener('click', () => {
+                    socket.emit('message', 'backward');
+                });
+        
+    </script>
+</body>
+</html>
