@@ -54,7 +54,7 @@
                     displayVerificationMessage(data.message);
 
                     if (data.message === 'Code is valid!') {
-                        const socketURL = `ws://idrone-controller.onrender.com/code/socket/${verificationCode}`;
+                        const socketURL = `wss://idrone-controller.onrender.com/code/socket/${verificationCode}`;
                         sessionStorage.setItem('socketURL', socketURL);
                         window.location.href = '/simulator';
                     }
