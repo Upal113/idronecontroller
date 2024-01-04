@@ -34,6 +34,10 @@
                 transports: ['websocket'],
             });
 
+            // Web Audio API
+            var audio = new Audio('industrial-pulse-drone-27456.mp3');
+            audio.loop = true;
+
             socket.on('message', text => {
                 console.log(text);
                 handleCommand(text);
@@ -51,18 +55,26 @@
                     break;
                 case 'down':
                     position.y = Math.max(position.y - 1, 0);
+                    // Check if the drone is on the ground
+                    if (position.y === 0) {
+                        // Stop playing the sound when the drone is on the ground
+                        audio.pause();
+                    } else {
+                        // Continue playing the sound if the drone is not on the ground
+                        audio.play();
+                    }
                     break;
                 case 'left':
-                    position.x = position.x - 1, -10;
+                    position.x = Math.max(position.x - 1, -10);
                     break;
                 case 'right':
-                    position.x = position.x + 1, 10;
+                    position.x = Math.min(position.x + 1, 10);
                     break;
                 case 'forward':
-                    position.z = position.z - 1, -10;
+                    position.z = Math.max(position.z - 1, -10);
                     break;
                 case 'backward':
-                    position.z = position.z + 1, 10;
+                    position.z = Math.min(position.z + 1, 10);
                     break;
             }
 
