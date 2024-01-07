@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Page</title>
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .verification-box {
+            width: 80%;
+            max-width: 400px;
+        }
+
+        #messageArea {
+            padding: 15px;
+            font-size: 24px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        #generateButton {
+            padding: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .controller-button {
+            padding: 20px;
+            font-size: 24px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container text-center verification-box">
+        <h2 class="mb-4">Enter your Team Name:</h2>
+        <input type="text" class="form-control" id="teamInput">
+        <h2 class="mb-4">Generate Code</h2>
+        <div id="messageArea" class="form-control" readonly></div>
+        <button class="btn btn-primary mt-3" id="generateButton">Generate Code</button>
+        <a href="" class="btn btn-secondary controller-button mt-3" id="controllerPage">Verify the code on Simulator First. Then click this for controller access.</a>
+    </div>
+
+    <!-- Add Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        document.getElementById('generateButton').addEventListener('click', function () {
+        // Call the /team endpoint
+        fetch('/team', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ team: document.getElementById('teamInput').value })
+        })
+            .then(response => response.json())
+            .then(data => {
+                var generatedCode = data.code;
+                const socketURL = `wss://idrone-controller.onrender.com/code/socket/${document.getElementById('teamInput').value}/${generatedCode}`;
+                console.log(socketURL)
+                sessionStorage.setItem('socketURL', socketURL);
+                document.getElementById('controllerPage').setAttribute('href', `/team/verify/controller`);
+                console.log('Socket Url Set');
+                displayMessage(generatedCode);
+            })
+            .catch(error => {
+                console.error(error);
+                displayMessage('Error Getting the Code');
+            });
+    });
+
+    function displayMessage(message) {
+        var messageArea = document.getElementById('messageArea');
+        messageArea.textContent = message;
+    }
+    </script>
+</body>
+
+</html>

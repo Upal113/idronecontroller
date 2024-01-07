@@ -52,6 +52,8 @@
 
 <body>
     <div class="container text-center verification-box">
+        <a href="/team" class="btn btn-secondary controller-button mt-3">Create a Team</a>
+        <a href="/team/verify/controller" class="btn btn-secondary controller-button mt-3">Join a team</a>
         <h2 class="mb-4">Generate Code</h2>
         <div id="messageArea" class="form-control" readonly></div>
         <button class="btn btn-primary mt-3" id="generateButton">Generate Code</button>
@@ -62,7 +64,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+    
     <script>
         document.getElementById('generateButton').addEventListener('click', function () {
             // Call the /generate_code endpoint

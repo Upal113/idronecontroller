@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Drone Simulator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.7.1/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-alongpath-component/dist/aframe-alongpath-component.min.js"></script>
+    <!-- Curve and walk along path components -->
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
 </head>
 
 <body>
@@ -14,16 +17,15 @@
         <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
         <a-camera id="myCamera" position="0 -0.02 0">
             <a-cursor intersection-spawn="event: click; mixin: voxel">
-                <a-image src="drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
+                <a-image src="/static/drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
             </a-cursor>
         </a-camera>
-        <a-box color="red" height="0.2" width="0.2" depth="0.1" position="0 -0.2 0"></a-box>
     </a-scene>
 
     <script>
         var camera = document.getElementById('myCamera');
         var position = camera.getAttribute('position');
-
+        console.log(camera);
         // Get WebSocket URL from session storage
         const socketURL = sessionStorage.getItem('socketURL');
         console.log(socketURL)
@@ -35,7 +37,7 @@
             });
 
             // Web Audio API
-            var audio = new Audio('industrial-pulse-drone-27456.mp3');
+            var audio = new Audio('/static/industrial-pulse-drone-27456.mp3');
             audio.loop = true;
 
             socket.on('message', text => {
@@ -54,6 +56,7 @@
                     }
         }
         function handleCommand(command) {
+            console.log(command)
             // Example: Move the drone based on the command
             // You may need to use a library or API to control the drone's movement
             switch (command) {
@@ -82,9 +85,36 @@
                     play_sound()
                     break;
                 case 'stop':
-                    position.x = position.x
-                    position.y = position.y
-                    position.z = position.z
+                    break;
+                case 'home':
+                    // Define a curve starting from the current position and ending at 0 -0.02 0
+                    var homeCurve = document.createElement('a-curve');
+                    homeCurve.setAttribute('id', 'homeCurve');
+                    homeCurve.innerHTML = `
+                        <a-curve-point position="${position.x} ${position.y} ${position.z}"></a-curve-point>
+                        <a-curve-point position="0 -0.02 0"></a-curve-point>
+                    `;
+                    document.getElementById('myScene').appendChild(homeCurve);
+                    // Calculate distance between current position and home position
+                    var distance = Math.sqrt(
+                        Math.pow(position.x, 2) +
+                        Math.pow(position.y + 0.02, 2) +
+                        Math.pow(position.z, 2)
+                    );
+
+                    // Set animation duration based on distance (adjust the factor as needed)
+                    var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
+                    // Animate the camera along the home curve
+                    camera.setAttribute('alongpath', {
+                        curve: '#homeCurve',
+                        dur: duration,
+                        loop: false
+                    });
+                    setTimeout(function(){
+                        document.getElementById('myScene').removeChild(homeCurve);
+                        camera.removeAttribute('alongpath');
+                    }, duration);
+                    break;
             }
 
             // Update camera position

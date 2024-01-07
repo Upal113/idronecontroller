@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drone Simulator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.7.1/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-alongpath-component/dist/aframe-alongpath-component.min.js"></script>
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
+</head>
+
+<body>
+    <a-scene id="myScene">
+        <a-entity environment="preset:arches;"></a-entity>
+        <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
+    </a-scene>
+
+    <script>
+        // Function to create a drone dynamically
+        function createDrone(color, position) {
+            var droneEntity = document.createElement('a-entity');
+            droneEntity.setAttribute('class', 'drone');
+            droneEntity.setAttribute('position', position);
+
+            var droneBox = document.createElement('a-box');
+            droneBox.setAttribute('color', color);
+            droneBox.setAttribute('height', '0.2');
+            droneBox.setAttribute('width', '0.2');
+            droneBox.setAttribute('depth', '0.1');
+
+            droneEntity.appendChild(droneBox);
+            document.getElementById('myScene').appendChild(droneEntity);
+        }
+
+        // Create a specified number of drones with random positions and colors
+        function createRandomDrones(numDrones) {
+            for (let i = 0; i < numDrones; i++) {
+                // Generate random position within a certain range
+                const randomPosition = `${Math.random() * 10 - 5} ${Math.random() * 3 + 1.5} ${Math.random() * 10 - 5}`;
+                
+                // Generate a random color
+                const randomColor = `#${Math.floor(Math.random()*16777215).toString(16)}`;
+                
+                // Create the drone
+                createDrone(randomColor, randomPosition);
+            }
+        }
+
+        // Create 2 random drones
+        createRandomDrones(2);
+    </script>
+</body>
+</html>

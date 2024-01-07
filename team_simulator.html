@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drone Simulator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.7.1/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-alongpath-component/dist/aframe-alongpath-component.min.js"></script>
+</head>
+
+<body>
+    <a-scene id="myScene">
+        <a-entity environment="preset:arches;"></a-entity>
+        <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
+
+        <!-- Create multiple drone instances -->
+        <script>
+            // Set Initial Position for First Drone
+            let x = 0;
+            let y = -0.02;
+            let z = 0;
+            const droneData = [];
+            
+
+            // Connect to the WebSocket server
+            const socketURL = sessionStorage.getItem('socketURL');
+            const socket = io(socketURL);
+            console.log(socketURL);
+
+            // Listen for updates from the server about new drones
+            socket.on('message', text => {
+                x+=0.2; z+=0.2;
+                console.log(text);
+                droneData.forEach(existingDrone => {
+                    const existingCamera = document.getElementById(existingDrone.socketURL);
+                    if (existingCamera) {
+                        existingCamera.parentNode.removeChild(existingCamera);
+                    }
+                });
+                droneData.push({socketURL: text, position: { x: x, y: y, z: z }})
+                // Create drones based on the data
+                droneData.forEach(drone => createDrone(drone));
+            });
+        </script>
+    </a-scene>
+
+    <script>
+        function createDrone(droneData) {
+            var camera = document.createElement("a-camera");
+            camera.setAttribute("id", droneData.socketURL);
+            camera.object3D.position.set(droneData.position.x, droneData.position.y, droneData.position.z);
+            var cursor = document.createElement("a-cursor");
+            cursor.setAttribute("intersection-spawn", "event: click; mixin: voxel");
+            var image = document.createElement("a-image");
+            image.setAttribute("src", "/static/drone-removebg-preview.png");
+            image.setAttribute("height", "0.5");
+            image.setAttribute("width", "0.5");
+            image.setAttribute("depth", "0.5");
+            const name = droneData.socketURL;
+            const username = name.split('/').pop();
+            var drone_name = document.createElement('a-text');
+            drone_name.setAttribute("value", username);
+            drone_name.object3D.position.set(droneData.position.x, droneData.position.y, droneData.position.z);
+            drone_name.setAttribute("color", 'white');
+            drone_name.setAttribute("scale", "0.3 0.3 0.3");
+            cursor.appendChild(drone_name);
+            cursor.appendChild(image);
+            camera.appendChild(cursor);
+            var scene = document.getElementById("myScene");
+            scene.appendChild(camera);
+
+            var audio = new Audio('/static/industrial-pulse-drone-27456.mp3');
+            audio.loop = true;
+
+            const socket = io(droneData.socketURL, {
+                transports: ['websocket'],
+            });
+
+            socket.on('message', text => {
+                handleCommand(text, camera);
+            });
+
+            function play_sound(){
+                var position = camera.getAttribute('position');
+                if (position.y === -2) {
+                    // Stop playing the sound when the drone is on the ground
+                    audio.pause();
+                } else {
+                    // Continue playing the sound if the drone is not on the ground
+                    audio.play();
+                }
+            }
+
+            function handleCommand(command, camera) {
+                console.log(command);
+                var position = camera.getAttribute('position');
+                // Example: Move the drone based on the command
+                // You may need to use a library or API to control the drone's movement
+                switch (command) {
+                    case 'up':
+                        position.y = Math.min(position.y + 1, 10);
+                        play_sound();
+                        break;
+                    case 'down':
+                        position.y = Math.max(position.y - 1, -2);
+                        play_sound();
+                        break;
+                    case 'left':
+                        position.x = position.x - 1;
+                        play_sound();
+                        break;
+                    case 'right':
+                        position.x = position.x + 1;
+                        play_sound();
+                        break;
+                    case 'forward':
+                        position.z = position.z - 1;
+                        play_sound();
+                        break;
+                    case 'backward':
+                        position.z = position.z + 1;
+                        play_sound();
+                        break;
+                    case 'stop':
+                        break;
+                    case 'home':
+                        // Define a curve starting from the current position and ending at 0 -0.02 0
+                        var homeCurve = document.createElement('a-curve');
+                        homeCurve.setAttribute('id', 'homeCurve');
+                        homeCurve.innerHTML = `
+                            <a-curve-point position="${position.x} ${position.y} ${position.z}"></a-curve-point>
+                            <a-curve-point position="0 -0.02 0"></a-curve-point>
+                        `;
+                        document.getElementById('myScene').appendChild(homeCurve);
+                        // Calculate distance between current position and home position
+                        var distance = Math.sqrt(
+                            Math.pow(position.x, 2) +
+                            Math.pow(position.y + 0.02, 2) +
+                            Math.pow(position.z, 2)
+                        );
+
+                        // Set animation duration based on distance (adjust the factor as needed)
+                        var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
+                        // Animate the camera along the home curve
+                        camera.setAttribute('alongpath', {
+                            curve: '#homeCurve',
+                            dur: duration,
+                            loop: false
+                        });
+                        setTimeout(function(){
+                            document.getElementById('myScene').removeChild(homeCurve);
+                            camera.removeAttribute('alongpath');
+                        }, duration);
+                        break;
+                }
+
+                // Update camera position
+                camera.setAttribute('position', position);
+            }
+        }
+    </script>
+</body>
+</html>

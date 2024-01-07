@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Page</title>
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .verification-box {
+            width: 80%;
+            max-width: 400px;
+        }
+
+        #verificationInput {
+            padding: 15px;
+            font-size: 30px; /* Increased font size */
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        #verifyButton {
+            padding: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #verificationMessage {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container text-center verification-box">
+        <h2 class="mb-4">Verification</h2>
+        <label for="NameInput">Enter your Name:</label>
+        <input type="text" class="form-control" id="NameInput">
+        <label for="teamNameInput">Enter your Team Name:</label>
+        <input type="text" class="form-control" id="teamNameInput">
+        <label for="verificationInput">Enter 6-digit number:</label>
+        <input type="text" class="form-control" id="verificationInput" maxlength="6">
+        <button class="btn btn-primary mt-3" id="verifyButton">Verify</button>
+        <div id="verificationMessage" class="mt-3"></div>
+    </div>
+
+    <!-- Add Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('verifyButton').addEventListener('click', function () {
+            const verificationCode = document.getElementById('verificationInput').value;
+            const teamName = document.getElementById('teamNameInput').value
+            const name = document.getElementById('NameInput').value
+
+            fetch('/team/verify/controller', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({team:  teamName, code: verificationCode, name : name})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displayVerificationMessage(data.message);
+
+                    if (data.message === 'Team and Code Verified') {
+                        console.log(teamName);
+                        const socketURL = `wss://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}`;
+                        const username = name;
+                        sessionStorage.setItem('socketURL', socketURL);
+                        sessionStorage.setItem('playerName', name);
+                        window.location.href = '/team/controller';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayVerificationMessage('Please check your team and verify.');
+                });
+        });
+
+        function displayVerificationMessage(message) {
+            var verificationMessage = document.getElementById('verificationMessage');
+            verificationMessage.textContent = message;
+        }
+    </script>
+</body>
+
+</html>
