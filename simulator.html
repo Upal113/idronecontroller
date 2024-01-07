@@ -13,8 +13,7 @@
 
 <body>
     <a-scene id="myScene">
-        <a-entity environment="preset:arches;"></a-entity>
-        <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
+        <a-sky src="/static/sky-image.jpg" rotation="0 -90 0"></a-sky>
         <a-camera id="myCamera" position="0 -0.02 0">
             <a-cursor intersection-spawn="event: click; mixin: voxel">
                 <a-image src="/static/drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
