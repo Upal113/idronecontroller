@@ -13,8 +13,8 @@
   <body>
     <a-scene>
       <a-assets>
-        <img id="texture-wall" src="img/arrow-left.png">
-        <img id="texture-floor" src="img/floor-texture-1.jpg">
+        <img id="texture-wall" src="/assets/arrow-left.png">
+        <img id="texture-floor" src="/assets/floor-texture-1.jpg">
         <a-box id="wall-one" 
           static-body material="src: #texture-wall" 
           depth="1" width="4" height="1"></a-box>
@@ -28,12 +28,6 @@
           position="0 0 0"
           color="red" 
           depth="0.5" width="0.5" height="10"></a-box>
-      <a-entity id="player"
-          camera
-          universal-controls
-          kinematic-body
-          position="-20 10.8 20">
-      </a-entity>
       <!-- birds-eye view box to stand on -->
       <!-- lower platform -->
       <a-box static-body 
@@ -68,7 +62,7 @@
           maze='size: 4 5;' 
           position='-30 0.5 -5'></a-entity>
 
-      <a-grid id="ground" width="200" height="200" static-body material="src: #texture-floor"></a-grid>
+      <a-grid id="ground" width="2000" height="2000" static-body material="src: #texture-floor"></a-grid>
     </a-scene>
   </body>
 </html>

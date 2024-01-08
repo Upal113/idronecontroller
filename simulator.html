@@ -15,14 +15,9 @@
 
 <body>
     <a-scene id="myScene">
-        <a-camera id="myCamera" position="0 -0.02 0">
-            <a-cursor intersection-spawn="event: click; mixin: voxel">
-                <a-image src="/static/drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
-            </a-cursor>
-        </a-camera>
         <a-assets>
-            <img id="texture-wall" src="arrow-left.png">
-            <img id="texture-floor" src="floor-texture-1.jpg">
+            <img id="texture-wall" src="/src/arrow-left.png">
+            <img id="texture-floor" src="/src/floor-texture-1.jpg">
             <a-box id="wall-one" 
               static-body material="src: #texture-wall" 
               depth="1" width="4" height="1"></a-box>
@@ -36,12 +31,6 @@
               position="0 0 0"
               color="red" 
               depth="0.5" width="0.5" height="10"></a-box>
-          <a-entity id="player"
-              camera
-              universal-controls
-              kinematic-body
-              position="-20 10.8 20">
-          </a-entity>
           <!-- birds-eye view box to stand on -->
           <!-- lower platform -->
           <a-box static-body 
@@ -77,6 +66,11 @@
               position='-30 0.5 -5'></a-entity>
     
           <a-grid id="ground" width="2000" height="2000" static-body material="src: #texture-floor"></a-grid>
+        <a-camera id="myCamera" position="0 -0.02 0">
+            <a-cursor intersection-spawn="event: click; mixin: voxel">
+                <a-image src="/static/drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
+            </a-cursor>
+        </a-camera>
     </a-scene>
 
     <script>
