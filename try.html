@@ -1,76 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>demo: aframe-maze-component</title>
+    <meta name="description" content="demo: aframe-maze-component">        
+    <script src="https://aframe.io/releases/0.7.1/aframe.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.13.1/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.6.0/dist/aframe-look-at-component.min.js"></script> 
+    <script src="https://unpkg.com/aframe-maze-component@0.1.24/dist/aframe-maze-component.min.js"></script>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+  </head>
+  <body>
+    <a-scene>
+      <a-assets>
+        <img id="texture-wall" src="img/arrow-left.png">
+        <img id="texture-floor" src="img/floor-texture-1.jpg">
+        <a-box id="wall-one" 
+          static-body material="src: #texture-wall" 
+          depth="1" width="4" height="1"></a-box>
+        <a-cylinder id="end-cap"
+          static-body color="#444444" 
+          depth="1.1" width="1.1" height="2"
+          radius="0.5"></a-cylinder>
+      </a-assets>
+      <a-sky id="sky" color="#0000ff"></a-sky>
+      <a-box id="center" 
+          position="0 0 0"
+          color="red" 
+          depth="0.5" width="0.5" height="10"></a-box>
+      <a-entity id="player"
+          camera
+          universal-controls
+          kinematic-body
+          position="-20 10.8 20">
+      </a-entity>
+      <!-- birds-eye view box to stand on -->
+      <!-- lower platform -->
+      <a-box static-body 
+          depth="0.25" height="1" width="1" 
+          position="-20 9.8 20"
+          rotation="-90 0 0"
+          color="tomato"></a-box>
 
-        #verificationInput {
-            padding: 15px; /* Increased padding */
-            font-size: 20px; /* Increased font size */
-            margin-right: 10px;
-            width: 80px; /* Increased width */
-        }
+      <a-entity id="maze1" 
+          maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 1 2 4 E 5;' 
+          position='0 0.5 0'
+          rotation='0 0 0'></a-entity>
 
-        #verifyButton {
-            padding: 15px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-    </style>
-</head>
+      <a-entity id="maze2" 
+          maze='size: 7 3; wall: #wall-one; cap: #end-cap; open: W 2 N 2 6;' 
+          position='30 0.5 0'
+          rotation='0 45 0'></a-entity>
 
-<body>
-    <label for="verificationInput">Enter 6-digit number:</label>
-    <input type="text" id="verificationInput" maxlength="6">
-    <button id="verifyButton">Verify</button>
+      <a-entity id="maze3A" 
+          maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 4;' 
+          position='25 0.5 -30'></a-entity>
 
-    <div id="verificationMessage"></div>
+      <a-entity id="maze3B" 
+          maze='size: 5 6; wall: #wall-one; cap: #end-cap 0.4;' 
+          position='25 4 -30'></a-entity>
+          
+      <a-entity id="maze4" 
+          maze='size: 4 5; wall: #wall-one; cap: #end-cap;' 
+          position='10 0.5 30'></a-entity>
+          
+       <a-entity id="maze5" 
+          maze='size: 4 5;' 
+          position='-30 0.5 -5'></a-entity>
 
-    <script>
-        document.getElementById('verifyButton').addEventListener('click', function () {
-            const verificationCode = document.getElementById('verificationInput').value;
-
-            fetch('/verify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ code: verificationCode })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    displayVerificationMessage(data.message);
-
-                    if (data.message === 'Code is valid!') {
-                        const socketURL = `wss://idrone-controller.onrender.com/code/socket/${verificationCode}`;
-                        sessionStorage.setItem('socketURL', socketURL);
-                        window.location.href = '/simulator';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    displayVerificationMessage('Error verifying the code.');
-                });
-        });
-
-        function displayVerificationMessage(message) {
-            var verificationMessage = document.getElementById('verificationMessage');
-            verificationMessage.textContent = message;
-        }
-    </script>
-</body>
-
+      <a-grid id="ground" width="200" height="200" static-body material="src: #texture-floor"></a-grid>
+    </a-scene>
+  </body>
 </html>
