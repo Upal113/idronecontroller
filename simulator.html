@@ -9,63 +9,12 @@
     <script src="https://unpkg.com/aframe-alongpath-component/dist/aframe-alongpath-component.min.js"></script>
     <!-- Curve and walk along path components -->
     <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
-    <script src="https://unpkg.com/aframe-look-at-component@0.6.0/dist/aframe-look-at-component.min.js"></script> 
-    <script src="https://unpkg.com/aframe-maze-component@0.1.24/dist/aframe-maze-component.min.js"></script>
 </head>
 
 <body>
     <a-scene id="myScene">
-        <a-assets>
-            <img id="texture-wall" src="/src/arrow-left.png">
-            <img id="texture-floor" src="/src/floor-texture-1.jpg">
-            <a-box id="wall-one" 
-              static-body material="src: #texture-wall" 
-              depth="1" width="4" height="1"></a-box>
-            <a-cylinder id="end-cap"
-              static-body color="#444444" 
-              depth="1.1" width="1.1" height="2"
-              radius="0.5"></a-cylinder>
-          </a-assets>
-          <a-sky id="sky" color="#0000ff"></a-sky>
-          <a-box id="center" 
-              position="0 0 0"
-              color="red" 
-              depth="0.5" width="0.5" height="10"></a-box>
-          <!-- birds-eye view box to stand on -->
-          <!-- lower platform -->
-          <a-box static-body 
-              depth="0.25" height="1" width="1" 
-              position="-20 9.8 20"
-              rotation="-90 0 0"
-              color="tomato"></a-box>
-    
-          <a-entity id="maze1" 
-              maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 1 2 4 E 5;' 
-              position='0 0.5 0'
-              rotation='0 0 0'></a-entity>
-    
-          <a-entity id="maze2" 
-              maze='size: 7 3; wall: #wall-one; cap: #end-cap; open: W 2 N 2 6;' 
-              position='30 0.5 0'
-              rotation='0 45 0'></a-entity>
-    
-          <a-entity id="maze3A" 
-              maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 4;' 
-              position='25 0.5 -30'></a-entity>
-    
-          <a-entity id="maze3B" 
-              maze='size: 5 6; wall: #wall-one; cap: #end-cap 0.4;' 
-              position='25 4 -30'></a-entity>
-              
-          <a-entity id="maze4" 
-              maze='size: 4 5; wall: #wall-one; cap: #end-cap;' 
-              position='10 0.5 30'></a-entity>
-              
-           <a-entity id="maze5" 
-              maze='size: 4 5;' 
-              position='-30 0.5 -5'></a-entity>
-    
-          <a-grid id="ground" width="2000" height="2000" static-body material="src: #texture-floor"></a-grid>
+        <a-entity environment="preset:arches;"></a-entity>
+        <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
         <a-camera id="myCamera" position="0 -0.02 0">
             <a-cursor intersection-spawn="event: click; mixin: voxel">
                 <a-image src="/static/drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>

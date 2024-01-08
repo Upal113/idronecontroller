@@ -156,9 +156,12 @@ app.get('/team/controller', (req, res) => {
   res.sendFile(path.join(__dirname, 'team_controller.html'));
 });
 
+
+app.get('/maze', (req, res) => {
+  res.sendFile(path.join(__dirname, 'try.html'));
+});
+
 server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
-
 
