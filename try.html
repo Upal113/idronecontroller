@@ -28,8 +28,6 @@
           position="0 0 0"
           color="red" 
           depth="0.5" width="0.5" height="10"></a-box>
-      <!-- birds-eye view box to stand on -->
-      <!-- lower platform -->
       <a-box static-body 
           depth="0.25" height="1" width="1" 
           position="-20 9.8 20"
@@ -61,7 +59,10 @@
        <a-entity id="maze5" 
           maze='size: 4 5;' 
           position='-30 0.5 -5'></a-entity>
-
+        <a-entity id="ocean" ocean="density: 20; width: 50; depth: 50; speed: 4"
+          material="color: #9CE3F9; opacity: 0.75; metalness: 0; roughness: 1"
+          rotation="-90 0 0"></a-entity>
+        <a-simple-sun-sky sun-position="1 0.4 0"></a-simple-sun-sky>
       <a-grid id="ground" width="2000" height="2000" static-body material="src: #texture-floor"></a-grid>
     </a-scene>
   </body>
