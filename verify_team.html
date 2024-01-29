@@ -80,8 +80,8 @@
 
                     if (data.message === 'Team and Code Verified') {
                         console.log(teamName);
-                        const socketURL = `ws://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}`;
-                        const socketURLplayer = `ws://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}/${name}`;
+                        const socketURL = `wss://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}`;
+                        const socketURLplayer = `wss://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}/${name}`;
                         sessionStorage.setItem('socketURL', socketURL);
                         sessionStorage.setItem('socketURLplayer', socketURLplayer);
                         window.location.href = '/team/simulator';
