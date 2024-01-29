@@ -88,7 +88,6 @@
     </div>
     <script>
         const socketURL = sessionStorage.getItem('socketURL');
-        console.log(socketURL);
         
         let socket = io(socketURL, {
             transports: ['websocket'],
@@ -101,12 +100,13 @@
             socket = io(newSocket, {
             transports: ['websocket'],
             });
-            console.log(socket, newSocket)
+            console.log(newSocket);
         }
         
 
         // Function to send WebSocket signal
         function sendWebSocketSignal(direction) {
+            console.log(direction);
             socket.emit('message', direction);
         }
 

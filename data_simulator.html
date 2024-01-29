@@ -129,15 +129,15 @@
                 console.log(distance);
                 if (distance< 0.4){
                     console.log(`Collison ${playerName}, ${player_name}`)
+                    existingPlayerEntity.setAttribute('position', `${myposition.x} ${myposition.y} ${myposition.z}`);
                     // Define a curve starting from the current position and ending at 0 -0.02 0
                     var homeCurve = document.createElement('a-curve');
                     homeCurve.setAttribute('id', 'homeCurve');
                     homeCurve.innerHTML = `
                         <a-curve-point position="${myposition.x} ${myposition.y} ${myposition.z}"></a-curve-point>
-                        <a-curve-point position="0 -0.02 0"></a-curve-point>
+                        <a-curve-point position="${myposition.x} ${myposition.y-myposition.y} ${myposition.z}"></a-curve-point>
                     `;
                     document.getElementById('myScene').appendChild(homeCurve);
-                    console.log('Home Curve')
                     // Calculate distance between current position and home position
                     var distance = Math.sqrt(
                         Math.pow(myposition.x, 2) +
@@ -146,7 +146,7 @@
                     );
 
                     // Set animation duration based on distance (adjust the factor as needed)
-                    var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
+                    var duration = Math.max(distance * 100); // At least 1000 milliseconds
                     // Animate the camera along the home curve
                     mycamera.setAttribute('alongpath', {
                         curve: '#homeCurve',
@@ -156,18 +156,8 @@
                     
                     setTimeout(function(){
                         document.getElementById('myScene').removeChild(homeCurve);
-                        mycamera.removeAttribute('alongpath');
-                        sendWebSocketSignal(player_name, {x: 0, y: 0, z: 0});
-                        myposition.x = 0;
-                        myposition.y = 0;
-                        myposition.z = 0;
-                        mycamera.setAttribute('position', myposition);
-                        const socketURLnewPlayer = socketURLTeam + '/' +playerName;
-                        const socketnewPlayer = io(socketURLnewPlayer, {
-                            transports: ['websocket'],
-                        });
-                        socketnewPlayer.emit("message", "collison");
-                    });
+                        camera.removeAttribute('alongpath');
+                    }, duration);
                 }
                 else{
                     existingPlayerEntity.setAttribute('position', playerPosition);
@@ -277,37 +267,7 @@
                     
                     setTimeout(function(){
                         document.getElementById('myScene').removeChild(homeCurve);
-                        mycamera.removeAttribute('alongpath');
-                    }, duration);
-                    break;
-                case 'collison':
-                    // Define a curve starting from the current position and ending at 0 -0.02 0
-                    var homeCurve = document.createElement('a-curve');
-                    homeCurve.setAttribute('id', 'homeCurve');
-                    homeCurve.innerHTML = `
-                        <a-curve-point position="${myposition.x} ${myposition.y} ${myposition.z}"></a-curve-point>
-                        <a-curve-point position="0 0 0"></a-curve-point>
-                    `;
-                    document.getElementById('myScene').appendChild(homeCurve);
-                    // Calculate distance between current position and home position
-                    var distance = Math.sqrt(
-                        Math.pow(myposition.x, 2) +
-                        Math.pow(myposition.y + 0.02, 2) +
-                        Math.pow(myposition.z, 2)
-                    );
-
-                    // Set animation duration based on distance (adjust the factor as needed)
-                    var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
-                    // Animate the camera along the home curve
-                    mycamera.setAttribute('alongpath', {
-                        curve: '#homeCurve',
-                        dur: duration,
-                        loop: false
-                    });
-                    
-                    setTimeout(function(){
-                        document.getElementById('myScene').removeChild(homeCurve);
-                        mycamera.removeAttribute('alongpath');
+                        camera.removeAttribute('alongpath');
                     }, duration);
                     break;
             }

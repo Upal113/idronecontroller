@@ -46,6 +46,9 @@ function initiateSocketConnectionTeam(team, verificationCode) {
     socket.on('message', (message) => {
       namespace.emit('message', `${message}`);
     });
+    socket.on('playerPosition', (playerPosition) => {
+      namespace.emit('playerPosition', playerPosition);
+    });
   });
 }
 
@@ -126,7 +129,6 @@ app.post('/team/verify/controller', (req, res)=> {
   let player = req.body.name;
   if (enteredTeam === team && enteredCode === teamcode){
     console.log('Team and Name Verrifed');
-    initiateSocketConnectionTeamPlayer(enteredTeam, enteredCode, player);
     console.log('Socket Connection Initiated');
     res.json({message : 'Team and Code Verified'});
   }
@@ -138,9 +140,11 @@ app.post('/team/verify/controller', (req, res)=> {
 app.post('/team/verify', (req, res)=> {
   let enteredTeam = req.body.team;
   let enteredCode = req.body.code;
+  let player = req.body.name;
   if (enteredTeam === team && enteredCode === teamcode){
     console.log('Team and Name Verrifed')
     res.json({message : 'Team and Code Verified'});
+    initiateSocketConnectionTeamPlayer(enteredTeam, enteredCode, player);
   }
   else{
     res.json({message : 'Please Check Your Team and Verification Code'});

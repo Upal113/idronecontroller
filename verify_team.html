@@ -44,7 +44,10 @@
 
 <body>
     <div class="container text-center verification-box">
+        
         <h2 class="mb-4">Verification</h2>
+        <label for="NameInput">Enter your Name:</label>
+        <input type="text" class="form-control" id="NameInput">
         <label for="teamNameInput">Enter your Team Name:</label>
         <input type="text" class="form-control" id="teamNameInput">
         <label for="verificationInput">Enter 6-digit number:</label>
@@ -61,14 +64,15 @@
     <script>
         document.getElementById('verifyButton').addEventListener('click', function () {
             const verificationCode = document.getElementById('verificationInput').value;
-            const teamName = document.getElementById('teamNameInput').value
+            const teamName = document.getElementById('teamNameInput').value;
+            const name = document.getElementById("NameInput").value;
 
             fetch('/team/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({team:  teamName, code: verificationCode})
+                body: JSON.stringify({team:  teamName, code: verificationCode, name: name})
             })
                 .then(response => response.json())
                 .then(data => {
@@ -76,9 +80,10 @@
 
                     if (data.message === 'Team and Code Verified') {
                         console.log(teamName);
-                        const socketURL = `wss://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}`;
-                        const username = name;
+                        const socketURL = `ws://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}`;
+                        const socketURLplayer = `ws://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}/${name}`;
                         sessionStorage.setItem('socketURL', socketURL);
+                        sessionStorage.setItem('socketURLplayer', socketURLplayer);
                         window.location.href = '/team/simulator';
                     }
                 })

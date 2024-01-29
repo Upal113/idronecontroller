@@ -9,13 +9,69 @@
     <script src="https://unpkg.com/aframe-alongpath-component/dist/aframe-alongpath-component.min.js"></script>
     <!-- Curve and walk along path components -->
     <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v3.8.6/dist/aframe-extras.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.13.1/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.6.0/dist/aframe-look-at-component.min.js"></script> 
+    <script src="https://unpkg.com/aframe-maze-component@0.1.24/dist/aframe-maze-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-system@4.0.1/dist/aframe-physics-system.min.js"></script>
 </head>
 
 <body>
-    <a-scene id="myScene">
-        <a-entity environment="preset:arches;"></a-entity>
+    <a-scene id="myScene" physics="debug: true">
+    <img id="texture-wall" src="/assets/arrow-left.png">
+    <img id="texture-floor" src="/assets/floor-texture-1.jpg">
+    <a-box id="wall-one" 
+          static-body material="src: #texture-wall" 
+          depth="1" width="4" height="1"></a-box>
+    <a-cylinder id="end-cap"
+          static-body color="#444444" 
+          depth="1.1" width="1.1" height="2"
+          radius="0.5"></a-cylinder>
+    <a-sky id="sky" color="#0000ff"></a-sky>
+    <a-box id="center" 
+          position="0 0 0"
+          color="red" 
+          depth="0.5" width="0.5" height="10"></a-box>
+    <a-box static-body 
+          depth="0.25" height="1" width="1" 
+          position="-20 9.8 20"
+          rotation="-90 0 0"
+          color="tomato"></a-box>
+    <a-entity id="maze1" 
+          maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 1 2 4 E 5;' 
+          position='0 0.5 0'
+          rotation='0 0 0' class="collidable"></a-entity>
+
+      <a-entity id="maze2" 
+          maze='size: 7 3; wall: #wall-one; cap: #end-cap; open: W 2 N 2 6;' 
+          position='30 0.5 0'
+          rotation='0 45 0' class="collidable"></a-entity>
+
+      <a-entity id="maze3A" 
+          maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 4;' 
+          position='25 0.5 -30' class="collidable"></a-entity>
+
+      <a-entity id="maze3B" 
+          maze='size: 5 6; wall: #wall-one; cap: #end-cap 0.4;' 
+          position='25 4 -30' class="collidable"></a-entity>
+          
+      <a-entity id="maze4" 
+          maze='size: 4 5; wall: #wall-one; cap: #end-cap;' 
+          position='10 0.5 30' class="collidable"></a-entity>
+          
+       <a-entity id="maze5" 
+          maze='size: 4 5;' 
+          position='-30 0.5 -5' class="collidable"></a-entity>
+        <a-entity id="ocean" ocean="density: 20; width: 50; depth: 50; speed: 4"
+          material="color: #9CE3F9; opacity: 0.75; metalness: 0; roughness: 1"
+          rotation="-90 0 0"></a-entity>
+        <a-entity id="ocean" ocean="density: 20; width: 50; depth: 50; speed: 4"
+          material="color: #9CE3F9; opacity: 0.75; metalness: 0; roughness: 1"
+          rotation="-90 0 0"></a-entity>
+        <a-simple-sun-sky sun-position="1 0.4 0"></a-simple-sun-sky>
+        <a-grid id="ground" width="2000" height="2000" static-body material="src: #texture-floor"></a-grid>
+        <a-sky id="sky" color="#0000ff"></a-sky>
         <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
-        <a-camera id="myCamera" position="0 -0.02 0">
+        <a-camera id="myCamera" position="0 -0.02 0" raycaster="objects: .collidable">
             <a-cursor intersection-spawn="event: click; mixin: voxel">
                 <a-image src="/static/drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
             </a-cursor>
@@ -47,7 +103,7 @@
             console.error('WebSocket URL not found in session storage.');
         }
         function play_sound(){
-            if (position.y === -2) {
+            if (position.y === 0) {
                         // Stop playing the sound when the drone is on the ground
                         audio.pause();
                     } else {
@@ -57,31 +113,32 @@
         }
         function handleCommand(command) {
             console.log(command)
+            var collisions = camera.components.raycaster.intersectedEls;
             // Example: Move the drone based on the command
             // You may need to use a library or API to control the drone's movement
             switch (command) {
                 case 'up':
-                    position.y = Math.min(position.y + 1, 10);
+                    position.y = Math.min(position.y + 0.1, 10);
                     play_sound()
                     break;
                 case 'down':
-                    position.y = Math.max(position.y - 1, -2);
+                    position.y = Math.max(position.y - 0.1, 0);
                     play_sound()
                     break;
                 case 'left':
-                    position.x = position.x - 1;
+                    position.x = position.x - 0.1;
                     play_sound()
                     break;
                 case 'right':
-                    position.x = position.x + 1, 10;
+                    position.x = position.x + 0.1;
                     play_sound()
                     break;
                 case 'forward':
-                    position.z = position.z - 1, -10;
+                    position.z = position.z - 0.1;
                     play_sound()
                     break;
                 case 'backward':
-                    position.z = position.z + 1, 10;
+                    position.z = position.z + 0.1;
                     play_sound()
                     break;
                 case 'stop':
@@ -116,7 +173,13 @@
                     }, duration);
                     break;
             }
-
+            if (collisions.length > 0) {
+                // Drone collided with an object, make it fall down
+                console.log("Drone Collided")
+                position.y = 0;
+                play_sound();
+                return;
+            }
             // Update camera position
             camera.setAttribute('position', position);
         }
