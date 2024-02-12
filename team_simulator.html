@@ -74,131 +74,141 @@
         <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
         <a-camera id="myCamera" position="0 -0.02 0" raycaster="objects: .collidable">
             <a-cursor intersection-spawn="event: click; mixin: voxel">
-                <a-image src="/static/drone-removebg-preview.png" height="0.5" width="0.5" depth="0.5"></a-image>
+                <a-text id="playerName" value="Your Player Name" position="0 0.5 0" color="#ffffff"></a-text>
+                <a-box id="colorBox" height="0.5" width="0.5" depth="0.5"></a-box>
             </a-cursor>
         </a-camera>
     </a-scene>
     <script>
+        var player_home = {};
         var mycamera = document.getElementById('myCamera');
-        var myposition = mycamera.getAttribute('position');
+        var playerNameText = document.getElementById('playerName');
+        var players = [];
+        var player_Sockets = {};
+        var player_Positions = {};
         // Get WebSocket URL from session storage
         const socketURL = sessionStorage.getItem('socketURLplayer');
         const player_name = socketURL.split('/').pop();
+        playerNameText.setAttribute('value', player_name);
         const socketURLTeam = sessionStorage.getItem('socketURL')
+        const socketTeam = io(socketURLTeam, {
+                transports: ['websocket'],
+            });
+        // Set color
+        fetch('/getcolor')
+        .then(response => response.json())
+        .then(data => {
+            // Extract color from data (assuming data is in JSON format)
+            const color = data.color;
 
+            // Apply color to the box
+            const box = document.getElementById('colorBox');
+            box.setAttribute('color', color);
+        })
+        .catch(error => {
+            console.error('Error fetching color:', error);
+        });
+        // Function to send WebSocket signal
+        function sendWebSocketSignal(player_name, player_Position) {
+            socketTeam.emit('Join', {Name: player_name, position: player_Position});
+        }
+        // Function to fetch position from endpoint and set it to the camera
+        function setPositionFromEndpoint() {
+            // Make AJAX request to the endpoint
+            fetch('/getposition')
+                .then(response => response.json())
+                .then(data => { 
+                    let position_string = `${data.x} ${data.y} ${data.z}`
+                    mycamera.setAttribute('position',position_string);
+                    player_home['myCamera'] = {x: data.x, y: data.y, z: data.z};
+                    sendWebSocketSignal(player_name, {x: data.x, y: data.y, z: data.z});
+
+                    // Set position from the data received from the endpoint
+                })
+                .catch(error => {
+                    console.error('Error fetching position:', error);
+                });
+        }
+        setPositionFromEndpoint();
+        // Call the function initially to set the initial position
+        var myposition = mycamera.getAttribute('position');
         // Check if socketURL exists before attempting to connect
         if (socketURL) {
             const socket = io(socketURL, {
                 transports: ['websocket'],
             });
-
+            player_Sockets[player_name] = socket;
             // Web Audio API
             var audio = new Audio('/static/industrial-pulse-drone-27456.mp3');
             audio.loop = true;
 
             socket.on('message', text => {
-                handleCommand(text);
+                handleCommand(text, "myCamera");
             });
         } else {
             console.error('WebSocket URL not found in session storage.');
         }
-        const socketTeam = io(socketURLTeam, {
-                transports: ['websocket'],
-            });
-        // Function to send WebSocket signal
-        function sendWebSocketSignal(player_name, player_Position) {
-            socketTeam.emit('playerPosition', {Name: player_name, position: player_Position});
-        }
-        socketTeam.on("playerPosition", playerPos => {
-            
+        socketTeam.on("Join", playerPos => {
+            console.log(`${playerPos.Name} ${playerPos.position.x} ${playerPos.position.y} ${playerPos.position.z} has joined`);
             // Extract player name and position from the received data
             const playerName = playerPos.Name;
             const playerPosition = playerPos.position;
 
-            // Check if an entity with the player name already exists
-            const existingPlayerEntity = document.getElementById(playerName);
-
-            if (existingPlayerEntity && playerName!= player_name) {
-                // Update the position of the existing entity
-                console.log("Found Player");
-                var distance = Math.sqrt(
-                Math.pow(myposition.x - playerPosition.x, 2) +
-                Math.pow(myposition.y - playerPosition.y + 0.02, 2) +
-                Math.pow(myposition.z - playerPosition.z, 2)
-                );
-                console.log(distance);
-                if (distance< 0.4){
-                    console.log(`Collison ${playerName}, ${player_name}`)
-                    // Define a curve starting from the current position and ending at 0 -0.02 0
-                    var homeCurve = document.createElement('a-curve');
-                    homeCurve.setAttribute('id', 'homeCurve');
-                    homeCurve.innerHTML = `
-                        <a-curve-point position="${myposition.x} ${myposition.y} ${myposition.z}"></a-curve-point>
-                        <a-curve-point position="0 -0.02 0"></a-curve-point>
-                    `;
-                    document.getElementById('myScene').appendChild(homeCurve);
-                    console.log('Home Curve')
-                    // Calculate distance between current position and home position
-                    var distance = Math.sqrt(
-                        Math.pow(myposition.x, 2) +
-                        Math.pow(myposition.y + 0.02, 2) +
-                        Math.pow(myposition.z, 2)
-                    );
-
-                    // Set animation duration based on distance (adjust the factor as needed)
-                    var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
-                    // Animate the camera along the home curve
-                    mycamera.setAttribute('alongpath', {
-                        curve: '#homeCurve',
-                        dur: duration,
-                        loop: false
-                    });
-                    
-                    setTimeout(function(){
-                        document.getElementById('myScene').removeChild(homeCurve);
-                        mycamera.removeAttribute('alongpath');
-                        sendWebSocketSignal(player_name, {x: 0, y: 0, z: 0});
-                        myposition.x = 0;
-                        myposition.y = 0;
-                        myposition.z = 0;
-                        mycamera.setAttribute('position', myposition);
-                        const socketURLnewPlayer = socketURLTeam + '/' +playerName;
-                        const socketnewPlayer = io(socketURLnewPlayer, {
-                            transports: ['websocket'],
-                        });
-                        socketnewPlayer.emit("message", "collison");
-                    });
-                }
-                else{
-                    existingPlayerEntity.setAttribute('position', playerPosition);
-                }
-            } else {
+            if (playerName!= player_name && !players.includes(playerName)) {
+                console.log("New Player Found");
                 const cameraElement = document.createElement('a-entity');
                 cameraElement.setAttribute('id', playerName);
-                cameraElement.setAttribute('position', '0 -0.02 0');
+                cameraElement.setAttribute('position', `${playerPosition.x} ${playerPosition.y} ${playerPosition.z}`);
                 cameraElement.setAttribute('raycaster', 'objects: .collidable');
                 // Create a-cursor element as a child of a-camera
                 const cursorElement = document.createElement('a-cursor');
                 cursorElement.setAttribute('intersection-spawn', 'event: click; mixin: voxel');
 
-                // Create a-image element as a child of a-cursor
-                const imageElement = document.createElement('a-image');
-                imageElement.setAttribute('src', '/static/drone-removebg-preview.png');
-                imageElement.setAttribute('height', '0.5');
-                imageElement.setAttribute('width', '0.5');
-                imageElement.setAttribute('depth', '0.5');
+                // Create a-box element as a child of a-cursor
+                const boxElement = document.createElement('a-box');
+                boxElement.setAttribute('height', '0.5');
+                boxElement.setAttribute('width', '0.5');
+                boxElement.setAttribute('depth', '0.5');
+
+                // Fetch color from endpoint
+                fetch('/getcolor')
+                .then(response => response.json())
+                .then(data => {
+                    // Extract color from data (assuming data is in JSON format)
+                    const color = data.color;
+                    // Apply color to the box
+                    boxElement.setAttribute('color', color);
+                })
+                .catch(error => {
+                    console.error('Error fetching color:', error);
+                });
                 const textElement = document.createElement('a-text');
                 textElement.setAttribute('value', playerName);
                 textElement.setAttribute('align', 'center');
                 textElement.setAttribute('position', '0 0.5 0');
                 // Append child elements
                 cursorElement.appendChild(textElement);
-                cursorElement.appendChild(imageElement);
+                cursorElement.appendChild(boxElement);
                 cameraElement.appendChild(cursorElement);
 
                 // Append a-camera element to the scene
                 document.getElementById('myScene').appendChild(cameraElement);
-
+                // Listen for the 'loaded' event on cameraElement
+                cameraElement.addEventListener('loaded', function () {
+                    // Now that the entity is fully loaded, get the updated position
+                    let newplayer = document.getElementById(playerName);
+                    let newplayerSocketUrl = socketURLTeam + '/' + playerName;
+                    let newplayerSocket = io(newplayerSocketUrl, {
+                        transports: ['websocket'],
+                    });
+                    player_Sockets[playerName] = newplayerSocket;
+                    player_home[playerName] = {x: playerPosition.x, y: playerPosition.y, z: playerPosition.z};
+                    newplayerSocket.on('message', text => {
+                        handleCommand(text, playerName);
+                    });
+                });
+                sendWebSocketSignal(player_name, {x: player_home['myCamera'].x, y: player_home['myCamera'].y, z: player_home['myCamera'].z});
+                players.push(playerName);
             }
         });
 
@@ -213,39 +223,35 @@
                     }
         }
 
-        function handleCommand(command) {
-            var collisions = mycamera.components.raycaster.intersectedEls;
+        function handleCommand(command, player) {
+            var cc = document.getElementById(player);
+            position = cc.getAttribute("position");
+            var collisions = cc.components.raycaster.intersectedEls;
             // Example: Move the drone based on the command
             // You may need to use a library or API to control the drone's movement
             switch (command) {
                 case 'up':
-                    myposition.y = Math.min(myposition.y + 0.1, 10);
-                    sendWebSocketSignal(player_name, {x: myposition.x, y: myposition.y, z: myposition.z});
+                    position.y = Math.min(position.y + 0.1, 10);
                     play_sound()
                     break;
                 case 'down':
-                    myposition.y = Math.max(myposition.y - 0.1, 0);
-                    sendWebSocketSignal(player_name, {x: myposition.x, y: myposition.y, z: myposition.z});
+                    position.y = Math.max(position.y - 0.1, 0);
                     play_sound()
                     break;
                 case 'left':
-                    myposition.x = myposition.x - 0.1;
-                    sendWebSocketSignal(player_name, {x: myposition.x, y: myposition.y, z: myposition.z});
+                    position.x = position.x - 0.1;
                     play_sound()
                     break;
                 case 'right':
-                    myposition.x = myposition.x + 0.1;
-                    sendWebSocketSignal(player_name, {x: myposition.x, y: myposition.y, z: myposition.z});
+                    position.x = position.x + 0.1;
                     play_sound()
                     break;
                 case 'forward':
-                    myposition.z = myposition.z - 0.1;
-                    sendWebSocketSignal(player_name, {x: myposition.x, y: myposition.y, z: myposition.z});
+                    position.z = position.z - 0.1;
                     play_sound()
                     break;
                 case 'backward':
-                    myposition.z = myposition.z + 0.1;
-                    sendWebSocketSignal(player_name, {x: myposition.x, y: myposition.y, z: myposition.z});
+                    position.z = position.z + 0.1;
                     play_sound()
                     break;
                 case 'stop':
@@ -255,21 +261,21 @@
                     var homeCurve = document.createElement('a-curve');
                     homeCurve.setAttribute('id', 'homeCurve');
                     homeCurve.innerHTML = `
-                        <a-curve-point position="${myposition.x} ${myposition.y} ${myposition.z}"></a-curve-point>
-                        <a-curve-point position="0 -0.02 0"></a-curve-point>
+                        <a-curve-point position="${position.x} ${position.y} ${position.z}"></a-curve-point>
+                        <a-curve-point position="${player_home[player].x} ${player_home[player].y} ${player_home[player].z}"></a-curve-point>
                     `;
                     document.getElementById('myScene').appendChild(homeCurve);
                     // Calculate distance between current position and home position
                     var distance = Math.sqrt(
-                        Math.pow(myposition.x, 2) +
-                        Math.pow(myposition.y + 0.02, 2) +
-                        Math.pow(myposition.z, 2)
+                        Math.pow(position.x, 2) +
+                        Math.pow(position.y + 0.02, 2) +
+                        Math.pow(position.z, 2)
                     );
 
                     // Set animation duration based on distance (adjust the factor as needed)
                     var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
                     // Animate the camera along the home curve
-                    mycamera.setAttribute('alongpath', {
+                    cc.setAttribute('alongpath', {
                         curve: '#homeCurve',
                         dur: duration,
                         loop: false
@@ -277,42 +283,95 @@
                     
                     setTimeout(function(){
                         document.getElementById('myScene').removeChild(homeCurve);
-                        mycamera.removeAttribute('alongpath');
+                        cc.removeAttribute('alongpath');
                     }, duration);
                     break;
                 case 'collison':
                     // Define a curve starting from the current position and ending at 0 -0.02 0
-                    var homeCurve = document.createElement('a-curve');
-                    homeCurve.setAttribute('id', 'homeCurve');
-                    homeCurve.innerHTML = `
-                        <a-curve-point position="${myposition.x} ${myposition.y} ${myposition.z}"></a-curve-point>
-                        <a-curve-point position="0 0 0"></a-curve-point>
+                    var collisonCurve = document.createElement('a-curve');
+                    var randomNumber = Math.floor(Math.random() * 20) + 1;
+                    collisonCurve.setAttribute('id', 'collisonCurve');
+                    collisonCurve.innerHTML = `
+                        <a-curve-point position="${position.x} ${position.y} ${position.z}"></a-curve-point>
+                        <a-curve-point position="${position.x+randomNumber} ${position.y - position.y} ${position.z}"></a-curve-point>
                     `;
-                    document.getElementById('myScene').appendChild(homeCurve);
+                    document.getElementById('myScene').appendChild(collisonCurve);
                     // Calculate distance between current position and home position
                     var distance = Math.sqrt(
-                        Math.pow(myposition.x, 2) +
-                        Math.pow(myposition.y + 0.02, 2) +
-                        Math.pow(myposition.z, 2)
+                        Math.pow(position.x, 2) +
+                        Math.pow(position.y + 0.02, 2) +
+                        Math.pow(position.z, 2)
                     );
 
                     // Set animation duration based on distance (adjust the factor as needed)
                     var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
                     // Animate the camera along the home curve
-                    mycamera.setAttribute('alongpath', {
-                        curve: '#homeCurve',
+                    cc.setAttribute('alongpath', {
+                        curve: '#collisonCurve',
                         dur: duration,
                         loop: false
                     });
                     
                     setTimeout(function(){
-                        document.getElementById('myScene').removeChild(homeCurve);
-                        mycamera.removeAttribute('alongpath');
+                        document.getElementById('myScene').removeChild(collisonCurve);
+                        cc.removeAttribute('alongpath');
                     }, duration);
                     break;
+                case 'rotate':
+                    // Get Current Rotation
+                    var initialPosition = cc.getAttribute('position');
+                    var initialRotation = cc.getAttribute('rotation');
+                    // Function to reset camera position and rotation
+                    function resetCamera() {
+                        cc.setAttribute('position', initialPosition);
+                        cc.setAttribute('rotation', initialRotation);
+                    }
+                    // Set initial rotation
+                    var currentRotation = 0;
+
+                    // Store the reference to the animation frame request
+                    var animationFrameId;
+
+                    // Define function to continuously rotate the camera
+                    function rotateCamera() {
+                        // Increment rotation angle
+                        currentRotation += 1;
+
+                        // Set new rotation
+                        cc.setAttribute('rotation', {
+                            x: 0,
+                            y: currentRotation,
+                            z: 0
+                        });
+
+                        // Request next frame and store the request ID
+                        animationFrameId = requestAnimationFrame(rotateCamera);
+                    }
+
+                    // Start rotating the camera
+                    rotateCamera();
+
+                    // Set a timer to stop rotation after 10 seconds (10000 milliseconds)
+                    setTimeout(function() {
+                        // Stop rotating the camera
+                        cancelAnimationFrame(animationFrameId);
+                        resetCamera();
+                    }, 5000); // 10 seconds
+                    break;    
             }
             // Update camera position
-            mycamera.setAttribute('position', myposition);
+            cc.setAttribute('position', position);
+            if (player!= "myCamera")
+            {
+                var distance = Math.sqrt(
+                        Math.pow(position.x- myposition.x, 2) +
+                        Math.pow(position.y - myposition.y + 0.02, 2) +
+                        Math.pow(position.z- myposition.z, 2)
+                    );
+                if(distance< 0.1){
+                    player_Sockets[player].emit('message', 'collison');
+                }
+            }
         }
     </script>
 </body>

@@ -5,6 +5,8 @@ const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
 
+var positions = [];
+var colors = ['LightCoral', 'FireBrick', 'DarkRed'];
 
 const app = express();
 const server = http.createServer(app);
@@ -48,6 +50,9 @@ function initiateSocketConnectionTeam(team, verificationCode) {
     });
     socket.on('playerPosition', (playerPosition) => {
       namespace.emit('playerPosition', playerPosition);
+    });
+    socket.on('Join', (playerPosition) => {
+      namespace.emit('Join', playerPosition);
     });
   });
 }
@@ -163,6 +168,18 @@ app.get('/team/controller', (req, res) => {
 
 app.get('/maze', (req, res) => {
   res.sendFile(path.join(__dirname, 'try.html'));
+});
+
+app.get('/getposition', (req, res) =>{
+  var randomx = Math.floor(Math.random() * 3) + 1;
+  var y = 2;
+  var randomz = Math.floor(Math.random() * 3) + 1;
+  res.json({x: randomx, y: y, z: randomz});
+});
+
+app.get('/getcolor', (req, res) => {
+  var randomValue = colors[Math.floor(Math.random() * colors.length)];
+  res.json({color: randomValue});
 });
 
 server.listen(port, () => {
