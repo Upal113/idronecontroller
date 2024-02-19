@@ -206,7 +206,7 @@
                 droneBody.setAttribute('width', '0.8');
                 droneBody.setAttribute('height', '0.1');
                 droneBody.setAttribute('depth', '0.5');
-                droneBody.setAttribute('color', 'grey');
+                droneBody.setAttribute('color', playerPos.color);
                 droneBody.setAttribute('position', '0 -0.15 0');
 
                 // Append main body of the drone to the drone entity
@@ -242,7 +242,7 @@
                     fan.setAttribute('id', data.id);
                     fan.setAttribute('height', '0.05');
                     fan.setAttribute('radius', '0.1');
-                    fan.setAttribute('color', 'blue');
+                    fan.setAttribute('color', playerPos.color);
                     fan.setAttribute('rotation', data.rotation);
                     fan.setAttribute('position', data.position);
                     droneEntity.appendChild(fan);
