@@ -70,12 +70,30 @@
           rotation="-90 0 0"></a-entity>
         <a-simple-sun-sky sun-position="1 0.4 0"></a-simple-sun-sky>
         <a-grid id="ground" width="2000" height="2000" static-body material="src: #texture-floor"></a-grid>
-        <a-sky id="sky" color="#0000ff"></a-sky>
+        <a-sky id="sky" color="blue"></a-sky>
         <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
         <a-camera id="myCamera" position="0 -0.02 0" raycaster="objects: .collidable">
             <a-cursor intersection-spawn="event: click; mixin: voxel">
-                <a-text id="playerName" value="Your Player Name" position="0 0.5 0" color="#ffffff"></a-text>
-                <a-box id="colorBox" height="0.5" width="0.5" depth="0.5"></a-box>
+                <a-text id="playerName" value="Your Player Name" position="0 0.2 0" color="#ffffff"></a-text>
+                <a-entity id="drone" position="0 0 0">
+                    <!-- Main body of the drone (rectangle) -->
+                    <a-box width="0.8" height="0.1" depth="0.5" color="grey" position="0 -0.15 0"></a-box>
+                    
+                    <!-- Vertical legs -->
+                    <a-cylinder height="0.6" radius="0.02" color="grey" position="0.4 -0.3 0.25"></a-cylinder>
+                    <a-cylinder height="0.6" radius="0.02" color="grey" position="-0.4 -0.3 0.25"></a-cylinder>
+                    <a-cylinder height="0.6" radius="0.02" color="grey" position="0.4 -0.3 -0.25"></a-cylinder>
+                    <a-cylinder height="0.6" radius="0.02" color="grey" position="-0.4 -0.3 -0.25"></a-cylinder>
+                
+                    <!-- Fans -->
+                    <!-- Front fan -->
+                    <a-cylinder id="front-fan1" height="0.05" radius="0.1" color="blue" rotation="20 0 0" position="0.2 0 0.3"></a-cylinder>
+                    <a-cylinder id="front-fan2" height="0.05" radius="0.1" color="blue" rotation="20 0 0" position="-0.2 0 0.3"></a-cylinder>
+                    <!-- Rear fan -->
+                    <a-cylinder id="rear-fan1" height="0.05" radius="0.1" color="blue" rotation="-20 0 0" position="-0.2 0 -0.3"></a-cylinder>
+                    <a-cylinder id="rear-fan2" height="0.05" radius="0.1" color="blue" rotation="-20 0 0" position="0.2 0 -0.3"></a-cylinder>
+                </a-entity>
+                
             </a-cursor>
         </a-camera>
     </a-scene>
@@ -86,6 +104,9 @@
         var players = [];
         var player_Sockets = {};
         var player_Positions = {};
+        var player_color;
+        var myposition;
+        var socket;
         // Get WebSocket URL from session storage
         const socketURL = sessionStorage.getItem('socketURLplayer');
         const player_name = socketURL.split('/').pop();
@@ -95,22 +116,29 @@
                 transports: ['websocket'],
             });
         // Set color
+        function changeDroneColor(color) {
+            // Update color of the main body
+            document.getElementById('drone').querySelector('a-box').setAttribute('color', color);
+            // Update color of the fans
+            document.getElementById('front-fan1').setAttribute('color', color);
+            document.getElementById('front-fan2').setAttribute('color', color);
+            document.getElementById('rear-fan1').setAttribute('color', color);
+            document.getElementById('rear-fan2').setAttribute('color', color);
+        }
         fetch('/getcolor')
         .then(response => response.json())
         .then(data => {
             // Extract color from data (assuming data is in JSON format)
-            const color = data.color;
+            player_color = data.color;
 
-            // Apply color to the box
-            const box = document.getElementById('colorBox');
-            box.setAttribute('color', color);
+            changeDroneColor(player_color);
         })
         .catch(error => {
             console.error('Error fetching color:', error);
         });
         // Function to send WebSocket signal
-        function sendWebSocketSignal(player_name, player_Position) {
-            socketTeam.emit('Join', {Name: player_name, position: player_Position});
+        function sendWebSocketSignal(player_name, player_Position, set_color, homeposition) {
+            socketTeam.emit('Join', {Name: player_name, position: player_Position, color: set_color, homepos: homeposition});
         }
         // Function to fetch position from endpoint and set it to the camera
         function setPositionFromEndpoint() {
@@ -120,8 +148,12 @@
                 .then(data => { 
                     let position_string = `${data.x} ${data.y} ${data.z}`
                     mycamera.setAttribute('position',position_string);
-                    player_home['myCamera'] = {x: data.x, y: data.y, z: data.z};
-                    sendWebSocketSignal(player_name, {x: data.x, y: data.y, z: data.z});
+                    mycamera.setAttribute('id', player_name);
+                    mycamera = document.getElementById(player_name);
+                    console.log(mycamera);
+                    myposition = mycamera.getAttribute('position');
+                    player_home[player_name] = {x: data.x, y: data.y, z: data.z};
+                    sendWebSocketSignal(player_name, {x: data.x, y: data.y, z: data.z}, player_color,{x: data.x, y: data.y, z: data.z});
 
                     // Set position from the data received from the endpoint
                 })
@@ -131,10 +163,10 @@
         }
         setPositionFromEndpoint();
         // Call the function initially to set the initial position
-        var myposition = mycamera.getAttribute('position');
+        
         // Check if socketURL exists before attempting to connect
         if (socketURL) {
-            const socket = io(socketURL, {
+            socket = io(socketURL, {
                 transports: ['websocket'],
             });
             player_Sockets[player_name] = socket;
@@ -143,13 +175,13 @@
             audio.loop = true;
 
             socket.on('message', text => {
-                handleCommand(text, "myCamera");
+                handleCommand(text, player_name);
             });
         } else {
             console.error('WebSocket URL not found in session storage.');
         }
         socketTeam.on("Join", playerPos => {
-            console.log(`${playerPos.Name} ${playerPos.position.x} ${playerPos.position.y} ${playerPos.position.z} has joined`);
+            console.log(`${playerPos.Name} ${playerPos.position.x} ${playerPos.position.y} ${playerPos.position.z}, ${playerPos.color}, ${playerPos.homepos.x} has joined`);
             // Extract player name and position from the received data
             const playerName = playerPos.Name;
             const playerPosition = playerPos.position;
@@ -164,31 +196,66 @@
                 const cursorElement = document.createElement('a-cursor');
                 cursorElement.setAttribute('intersection-spawn', 'event: click; mixin: voxel');
 
-                // Create a-box element as a child of a-cursor
-                const boxElement = document.createElement('a-box');
-                boxElement.setAttribute('height', '0.5');
-                boxElement.setAttribute('width', '0.5');
-                boxElement.setAttribute('depth', '0.5');
+                // Create a new a-entity for the drone
+                const droneEntity = document.createElement('a-entity');
+                droneEntity.setAttribute('id', 'drone');
+                droneEntity.setAttribute('position', '0 0 0');
 
-                // Fetch color from endpoint
-                fetch('/getcolor')
-                .then(response => response.json())
-                .then(data => {
-                    // Extract color from data (assuming data is in JSON format)
-                    const color = data.color;
-                    // Apply color to the box
-                    boxElement.setAttribute('color', color);
-                })
-                .catch(error => {
-                    console.error('Error fetching color:', error);
+                // Main body of the drone (rectangle)
+                const droneBody = document.createElement('a-box');
+                droneBody.setAttribute('width', '0.8');
+                droneBody.setAttribute('height', '0.1');
+                droneBody.setAttribute('depth', '0.5');
+                droneBody.setAttribute('color', 'grey');
+                droneBody.setAttribute('position', '0 -0.15 0');
+
+                // Append main body of the drone to the drone entity
+                droneEntity.appendChild(droneBody);
+
+                // Vertical legs
+                const legPositions = [
+                    { x: 0.4, z: 0.25 },
+                    { x: -0.4, z: 0.25 },
+                    { x: 0.4, z: -0.25 },
+                    { x: -0.4, z: -0.25 }
+                ];
+
+                legPositions.forEach(position => {
+                    const leg = document.createElement('a-cylinder');
+                    leg.setAttribute('height', '0.6');
+                    leg.setAttribute('radius', '0.02');
+                    leg.setAttribute('color', 'grey');
+                    leg.setAttribute('position', `${position.x} -0.3 ${position.z}`);
+                    droneEntity.appendChild(leg);
                 });
+
+                // Fans
+                const fanData = [
+                    { id: 'front-fan1', position: '0.2 0 0.3', rotation: '20 0 0' },
+                    { id: 'front-fan2', position: '-0.2 0 0.3', rotation: '20 0 0' },
+                    { id: 'rear-fan1', position: '-0.2 0 -0.3', rotation: '-20 0 0' },
+                    { id: 'rear-fan2', position: '0.2 0 -0.3', rotation: '-20 0 0' }
+                ];
+
+                fanData.forEach(data => {
+                    const fan = document.createElement('a-cylinder');
+                    fan.setAttribute('id', data.id);
+                    fan.setAttribute('height', '0.05');
+                    fan.setAttribute('radius', '0.1');
+                    fan.setAttribute('color', 'blue');
+                    fan.setAttribute('rotation', data.rotation);
+                    fan.setAttribute('position', data.position);
+                    droneEntity.appendChild(fan);
+                });
+
+                
                 const textElement = document.createElement('a-text');
                 textElement.setAttribute('value', playerName);
                 textElement.setAttribute('align', 'center');
                 textElement.setAttribute('position', '0 0.5 0');
                 // Append child elements
                 cursorElement.appendChild(textElement);
-                cursorElement.appendChild(boxElement);
+                cursorElement.appendChild(droneEntity);
                 cameraElement.appendChild(cursorElement);
 
                 // Append a-camera element to the scene
@@ -202,12 +269,12 @@
                         transports: ['websocket'],
                     });
                     player_Sockets[playerName] = newplayerSocket;
-                    player_home[playerName] = {x: playerPosition.x, y: playerPosition.y, z: playerPosition.z};
+                    player_home[playerName] = {x: playerPos.homepos.x, y: playerPos.homepos.y, z: playerPos.homepos.z};
                     newplayerSocket.on('message', text => {
                         handleCommand(text, playerName);
                     });
                 });
-                sendWebSocketSignal(player_name, {x: player_home['myCamera'].x, y: player_home['myCamera'].y, z: player_home['myCamera'].z});
+                sendWebSocketSignal(player_name, {x: myposition.x, y: myposition.y, z: myposition.z}, player_color, {x: player_home[player_name].x, y: player_home[player_name].y, z: player_home[player_name].z});
                 players.push(playerName);
             }
         });
@@ -222,8 +289,9 @@
                         audio.play();
                     }
         }
-
+        var collisionHandled = false;
         function handleCommand(command, player) {
+            
             var cc = document.getElementById(player);
             position = cc.getAttribute("position");
             var collisions = cc.components.raycaster.intersectedEls;
@@ -233,90 +301,179 @@
                 case 'up':
                     position.y = Math.min(position.y + 0.1, 10);
                     play_sound()
+                    cc.setAttribute('position', position)
+                    if (player!= player_name && !collisionHandled)
+                    {
+                        var distance = Math.sqrt(
+                                Math.pow(position.x- myposition.x, 2) +
+                                Math.pow(position.y - myposition.y, 2) +
+                                Math.pow(position.z- myposition.z, 2)
+                            );
+                        
+                        console.log(player, distance);
+                        if(distance< 0.5){
+                            console.log(player);
+                            player_Sockets[player].emit('message', 'collison');
+                            player_Sockets[player_name].emit('message', 'collison');
+                        }
+                    }
                     break;
                 case 'down':
                     position.y = Math.max(position.y - 0.1, 0);
                     play_sound()
+                    cc.setAttribute('position', position)
+                    if (player!= player_name && !collisionHandled)
+                    {
+                        var distance = Math.sqrt(
+                                Math.pow(position.x- myposition.x, 2) +
+                                Math.pow(position.y - myposition.y, 2) +
+                                Math.pow(position.z- myposition.z, 2)
+                            );
+                        
+                        console.log(player, distance);
+                        if(distance< 0.5){
+                            console.log(player);
+                            player_Sockets[player].emit('message', 'collison');
+                            player_Sockets[player_name].emit('message', 'collison');
+                        }
+                    }
                     break;
                 case 'left':
                     position.x = position.x - 0.1;
                     play_sound()
+                    cc.setAttribute('position', position)
+                    if (player!= player_name && !collisionHandled)
+                    {
+                        var distance = Math.sqrt(
+                                Math.pow(position.x- myposition.x, 2) +
+                                Math.pow(position.y - myposition.y, 2) +
+                                Math.pow(position.z- myposition.z, 2)
+                            );
+                        
+                        console.log(player, distance);
+                        if(distance< 0.5){
+                            console.log(player);
+                            player_Sockets[player].emit('message', 'collison');
+                            player_Sockets[player_name].emit('message', 'collison');
+                        }
+                    }
                     break;
                 case 'right':
                     position.x = position.x + 0.1;
                     play_sound()
+                    cc.setAttribute('position', position)
+                    if (player!= player_name && !collisionHandled)
+                    {
+                        var distance = Math.sqrt(
+                                Math.pow(position.x- myposition.x, 2) +
+                                Math.pow(position.y - myposition.y, 2) +
+                                Math.pow(position.z- myposition.z, 2)
+                            );
+                        
+                        console.log(player, distance);
+                        if(distance< 0.5){
+                            console.log(player);
+                            player_Sockets[player].emit('message', 'collison');
+                            player_Sockets[player_name].emit('message', 'collison');
+                        }
+                    }
                     break;
                 case 'forward':
                     position.z = position.z - 0.1;
                     play_sound()
+                    cc.setAttribute('position', position)
+                    if (player!= player_name && !collisionHandled)
+                    {
+                        var distance = Math.sqrt(
+                                Math.pow(position.x- myposition.x, 2) +
+                                Math.pow(position.y - myposition.y, 2) +
+                                Math.pow(position.z- myposition.z, 2)
+                            );
+                        
+                        console.log(player, distance);
+                        if(distance< 0.5){
+                            console.log(player);
+                            player_Sockets[player].emit('message', 'collison');
+                            player_Sockets[player_name].emit('message', 'collison');
+                        }
+                    }
                     break;
                 case 'backward':
                     position.z = position.z + 0.1;
                     play_sound()
+                    cc.setAttribute('position', position)
+                    if (player!= player_name && !collisionHandled)
+                    {
+                        var distance = Math.sqrt(
+                                Math.pow(position.x- myposition.x, 2) +
+                                Math.pow(position.y - myposition.y, 2) +
+                                Math.pow(position.z- myposition.z, 2)
+                            );
+                        
+                        console.log(player, distance);
+                        if(distance< 0.5){
+                            console.log(player);
+                            player_Sockets[player].emit('message', 'collison');
+                            player_Sockets[player_name].emit('message', 'collison');
+                        }
+                    }
                     break;
                 case 'stop':
                     break;
                 case 'home':
-                    // Define a curve starting from the current position and ending at 0 -0.02 0
-                    var homeCurve = document.createElement('a-curve');
-                    homeCurve.setAttribute('id', 'homeCurve');
-                    homeCurve.innerHTML = `
-                        <a-curve-point position="${position.x} ${position.y} ${position.z}"></a-curve-point>
-                        <a-curve-point position="${player_home[player].x} ${player_home[player].y} ${player_home[player].z}"></a-curve-point>
-                    `;
-                    document.getElementById('myScene').appendChild(homeCurve);
-                    // Calculate distance between current position and home position
+                    // Define the target position
+                    var targetPosition = { x: player_home[player].x, y: player_home[player].y, z: player_home[player].z };
+
+                    // Calculate the distance to the target position
                     var distance = Math.sqrt(
-                        Math.pow(position.x, 2) +
-                        Math.pow(position.y + 0.02, 2) +
-                        Math.pow(position.z, 2)
+                        Math.pow(targetPosition.x - position.x, 2) +
+                        Math.pow(targetPosition.y - position.y, 2) +
+                        Math.pow(targetPosition.z - position.z, 2)
                     );
 
-                    // Set animation duration based on distance (adjust the factor as needed)
+                    // Set the duration of the movement animation (adjust the speed as needed)
                     var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
-                    // Animate the camera along the home curve
-                    cc.setAttribute('alongpath', {
-                        curve: '#homeCurve',
-                        dur: duration,
-                        loop: false
-                    });
-                    
-                    setTimeout(function(){
-                        document.getElementById('myScene').removeChild(homeCurve);
-                        cc.removeAttribute('alongpath');
-                    }, duration);
+
+                    // Define a function to update the position gradually
+                    function moveTowardsTarget() {
+                        var step = 0.01; // Adjust step size as needed
+                        if (position.x < targetPosition.x) position.x += step;
+                        else if (position.x > targetPosition.x) position.x -= step;
+                        if (position.y < targetPosition.y) position.y += step;
+                        else if (position.y > targetPosition.y) position.y -= step;
+                        if (position.z < targetPosition.z) position.z += step;
+                        else if (position.z > targetPosition.z) position.z -= step;
+
+                        // Update the position attribute of the drone
+                        cc.setAttribute('position', position);
+
+                        // If the drone has reached the target position, stop the animation
+                        if (Math.abs(position.x - targetPosition.x) < step &&
+                            Math.abs(position.y - targetPosition.y) < step &&
+                            Math.abs(position.z - targetPosition.z) < step) {
+                            clearInterval(animationInterval);
+                        }
+                    }
+
+                    // Start the animation
+                    var animationInterval = setInterval(moveTowardsTarget, 10); // Run the animation loop every 10 milliseconds
                     break;
                 case 'collison':
-                    // Define a curve starting from the current position and ending at 0 -0.02 0
-                    var collisonCurve = document.createElement('a-curve');
-                    var randomNumber = Math.floor(Math.random() * 20) + 1;
-                    collisonCurve.setAttribute('id', 'collisonCurve');
-                    collisonCurve.innerHTML = `
-                        <a-curve-point position="${position.x} ${position.y} ${position.z}"></a-curve-point>
-                        <a-curve-point position="${position.x+randomNumber} ${position.y - position.y} ${position.z}"></a-curve-point>
-                    `;
-                    document.getElementById('myScene').appendChild(collisonCurve);
-                    // Calculate distance between current position and home position
-                    var distance = Math.sqrt(
-                        Math.pow(position.x, 2) +
-                        Math.pow(position.y + 0.02, 2) +
-                        Math.pow(position.z, 2)
-                    );
-
-                    // Set animation duration based on distance (adjust the factor as needed)
-                    var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
-                    // Animate the camera along the home curve
-                    cc.setAttribute('alongpath', {
-                        curve: '#collisonCurve',
-                        dur: duration,
-                        loop: false
-                    });
-                    
-                    setTimeout(function(){
-                        document.getElementById('myScene').removeChild(collisonCurve);
-                        cc.removeAttribute('alongpath');
-                    }, duration);
+                    collisonHandled = true;
+                    var ypos = Math.floor(position.y);
+                    console.log(ypos);
+                    for(let i= 0; i<ypos; i++)
+                    {
+                        setTimeout(() => {
+                            console.log(i);
+                            player_Sockets[player].emit('message', 'down');
+                        }, 500);
+                    }
+                    setTimeout(() => {
+                        collisionHandled = false;
+                    }, 10000); // Reset after 10 second
                     break;
+                
                 case 'rotate':
                     // Get Current Rotation
                     var initialPosition = cc.getAttribute('position');
@@ -356,21 +513,8 @@
                         // Stop rotating the camera
                         cancelAnimationFrame(animationFrameId);
                         resetCamera();
-                    }, 5000); // 10 seconds
+                    }, 10000); // 10 seconds
                     break;    
-            }
-            // Update camera position
-            cc.setAttribute('position', position);
-            if (player!= "myCamera")
-            {
-                var distance = Math.sqrt(
-                        Math.pow(position.x- myposition.x, 2) +
-                        Math.pow(position.y - myposition.y + 0.02, 2) +
-                        Math.pow(position.z- myposition.z, 2)
-                    );
-                if(distance< 0.1){
-                    player_Sockets[player].emit('message', 'collison');
-                }
             }
         }
     </script>

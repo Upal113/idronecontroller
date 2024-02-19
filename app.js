@@ -6,7 +6,7 @@ const socketIO = require('socket.io');
 const path = require('path');
 
 var positions = [];
-var colors = ['LightCoral', 'FireBrick', 'DarkRed'];
+var colors = ['red', 'green', 'blue', 'white', 'gray'];
 
 const app = express();
 const server = http.createServer(app);
@@ -171,13 +171,14 @@ app.get('/maze', (req, res) => {
 });
 
 app.get('/getposition', (req, res) =>{
-  var randomx = Math.floor(Math.random() * 3) + 1;
+  var randomx = Math.floor(Math.random() * 8) + 1;
   var y = 2;
-  var randomz = Math.floor(Math.random() * 3) + 1;
+  var randomz = Math.floor(Math.random() * 10) + 1;
   res.json({x: randomx, y: y, z: randomz});
 });
 
 app.get('/getcolor', (req, res) => {
+  console.log(colors.length);
   var randomValue = colors[Math.floor(Math.random() * colors.length)];
   res.json({color: randomValue});
 });

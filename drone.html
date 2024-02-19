@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A-Frame Drone Scene</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+</head>
+<body>
+  <a-scene>
+    
+  </a-scene>
+
+  <script>
+    // Create a scene
+    var scene = document.querySelector("a-scene");
+
+    // Create a camera
+    var camera = document.createElement("a-camera");
+    camera.setAttribute("position", "0 1.6 0");
+    camera.setAttribute("rotation", "0 180 0"); // Rotate the camera 180 degrees around the y-axis
+    scene.appendChild(camera);
+
+    // Create a drone body
+    var body = document.createElement("a-box");
+    body.setAttribute("width", "0.5");
+    body.setAttribute("height", "0.2");
+    body.setAttribute("depth", "0.3");
+    body.setAttribute("color", "gray");
+    body.setAttribute("position", "0 1 -3");
+    scene.appendChild(body);
+
+    // Create a middle rectangle
+    var middle = document.createElement("a-box");
+    middle.setAttribute("width", "0.2");
+    middle.setAttribute("height", "0.1");
+    middle.setAttribute("depth", "0.2");
+    middle.setAttribute("color", "gray");
+    middle.setAttribute("position", "0 1.05 -3");
+    scene.appendChild(middle);
+
+    // Create four legs
+    var legs = [];
+    var legPositions = [
+      [-0.15, 0.9, -2.9],
+      [0.15, 0.9, -2.9],
+      [-0.15, 0.9, -3.1],
+      [0.15, 0.9, -3.1]
+    ];
+    for (var i = 0; i < 4; i++) {
+      var leg = document.createElement("a-box");
+      leg.setAttribute("width", "0.05");
+      leg.setAttribute("height", "0.2");
+      leg.setAttribute("depth", "0.05");
+      leg.setAttribute("color", "gray");
+      leg.setAttribute("rotation", "-90 0 0"); // Make the legs parallel to the ground
+      leg.setAttribute("position", legPositions[i].join(" "));
+      scene.appendChild(leg);
+      legs.push(leg);
+    }
+
+    // Create four propellers
+    // Create four propellers
+    var propellers = [];
+    var propellerPositions = [
+    [-0.25, 1.1, -2.9],
+    [0.25, 1.1, -2.9],
+    [-0.25, 1.1, -3.1],
+    [0.25, 1.1, -3.1]
+    ];
+    for (var j = 0; j < 4; j++) {
+    var propeller = document.createElement("a-box");
+    propeller.setAttribute("width", "0.02"); // Small width
+    propeller.setAttribute("height", "0.2"); // Long height
+    propeller.setAttribute("depth", "0.005"); // Thin depth
+    propeller.setAttribute("color", "black");
+    propeller.setAttribute("rotation", "-90 0 0");
+    propeller.setAttribute("position", propellerPositions[j].join(" "));
+    scene.appendChild(propeller);
+    propellers.push(propeller);
+    }
+
+
+    // Animate the propellers
+    AFRAME.registerComponent("spin", {
+      tick: function () {
+        // Get the current rotation
+        var rotation = this.el.getAttribute("rotation");
+
+        // Increment the z-axis rotation by 10 degrees per frame
+        rotation.y += 10;
+
+        // Set the new rotation
+        this.el.setAttribute("rotation", rotation);
+      }
+    });
+
+    // Add the spin component to the propellers
+    for (var k = 0; k < 4; k++) {
+      propellers[k].setAttribute("spin", "");
+    }
+  </script>
+</body>
+</html>
