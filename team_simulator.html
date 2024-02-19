@@ -298,30 +298,7 @@
             // Example: Move the drone based on the command
             // You may need to use a library or API to control the drone's movement
             switch (command) {
-                case 'goup':
-                    position.y = Math.min(position.y + 0.1, 10);
-                    play_sound()
-                    cc.setAttribute('position', position)
-                case 'godown':
-                    position.y = Math.max(position.y - 0.1, 0);
-                    play_sound()
-                    cc.setAttribute('position', position)
-                case 'goleft':
-                    position.x = position.x - 0.1;
-                    play_sound()
-                    cc.setAttribute('position', position)
-                case 'goright':
-                    position.x = position.x + 0.1;
-                    play_sound()
-                    cc.setAttribute('position', position)
-                case 'goforward':
-                    position.z = position.z - 0.1;
-                    play_sound()
-                    cc.setAttribute('position', position)
-                case 'gobackward':
-                    position.z = position.z + 0.1;
-                    play_sound()
-                    cc.setAttribute('position', position)
+                
                 case 'up':
                     position.y = Math.min(position.y + 0.1, 10);
                     play_sound()
@@ -461,13 +438,15 @@
                     // Define a function to update the position gradually
                     function moveTowardsTarget() {
                         var step = 0.01; // Adjust step size as needed
-                        if (position.x < targetPosition.x){player_Sockets[player].emit('message', 'goright')};
-                        if (position.x > targetPosition.x) {player_Sockets[player].emit('message', 'goleft')};
-                        if (position.y < targetPosition.y) {player_Sockets[player].emit('message', 'goup')};
-                        if (position.y > targetPosition.y) {player_Sockets[player].emit('message', 'godown')};
-                        if (position.z < targetPosition.z) {player_Sockets[player].emit('message', 'gobackward')};
-                        if (position.z > targetPosition.z) {player_Sockets[player].emit('message', 'goforward')};;
+                        if (position.x < targetPosition.x) position.x += step;
+                        else if (position.x > targetPosition.x) position.x -= step;
+                        if (position.y < targetPosition.y) position.y += step;
+                        else if (position.y > targetPosition.y) position.y -= step;
+                        if (position.z < targetPosition.z) position.z += step;
+                        else if (position.z > targetPosition.z) position.z -= step;
 
+                        // Update the position attribute of the drone
+                        cc.setAttribute('position', position);
 
                         // If the drone has reached the target position, stop the animation
                         if (Math.abs(position.x - targetPosition.x) < step &&
