@@ -291,18 +291,17 @@
         }
         var collisionHandled = false;
         function handleCommand(command, player) {
-            
-            var cc = document.getElementById(player);
-            position = cc.getAttribute("position");
-            var collisions = cc.components.raycaster.intersectedEls;
+            console.log(player, command);
             // Example: Move the drone based on the command
             // You may need to use a library or API to control the drone's movement
             switch (command) {
-                
                 case 'up':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     position.y = Math.min(position.y + 0.1, 10);
                     play_sound()
                     cc.setAttribute('position', position)
+                    console.log(player, position.x, position.y, position.z);
                     if (player!= player_name && !collisionHandled)
                     {
                         var distance = Math.sqrt(
@@ -320,9 +319,12 @@
                     }
                     break;
                 case 'down':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     position.y = Math.max(position.y - 0.1, 0);
                     play_sound()
                     cc.setAttribute('position', position)
+                    console.log(player, position.x, position.y, position.z);
                     if (player!= player_name && !collisionHandled)
                     {
                         var distance = Math.sqrt(
@@ -340,9 +342,12 @@
                     }
                     break;
                 case 'left':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     position.x = position.x - 0.1;
                     play_sound()
                     cc.setAttribute('position', position)
+                    console.log(player, position.x, position.y, position.z);
                     if (player!= player_name && !collisionHandled)
                     {
                         var distance = Math.sqrt(
@@ -360,9 +365,12 @@
                     }
                     break;
                 case 'right':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     position.x = position.x + 0.1;
                     play_sound()
                     cc.setAttribute('position', position)
+                    console.log(player, position.x, position.y, position.z);
                     if (player!= player_name && !collisionHandled)
                     {
                         var distance = Math.sqrt(
@@ -380,9 +388,12 @@
                     }
                     break;
                 case 'forward':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     position.z = position.z - 0.1;
                     play_sound()
                     cc.setAttribute('position', position)
+                    console.log(player, position.x, position.y, position.z);
                     if (player!= player_name && !collisionHandled)
                     {
                         var distance = Math.sqrt(
@@ -400,9 +411,12 @@
                     }
                     break;
                 case 'backward':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     position.z = position.z + 0.1;
                     play_sound()
                     cc.setAttribute('position', position)
+                    console.log(player, position.x, position.y, position.z);
                     if (player!= player_name && !collisionHandled)
                     {
                         var distance = Math.sqrt(
@@ -422,44 +436,46 @@
                 case 'stop':
                     break;
                 case 'home':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     // Define the target position
-                    var targetPosition = { x: player_home[player].x, y: player_home[player].y, z: player_home[player].z };
-
-                    // Calculate the distance to the target position
+                    var homeCurve = document.createElement('a-curve');
+                    homeCurve.setAttribute('id', 'homeCurve');
+                    homeCurve.innerHTML = `
+                        <a-curve-point position="${position.x} ${position.y} ${position.z}"></a-curve-point>
+                        <a-curve-point position="${player_home[player].x} ${player_home[player].y} ${player_home[player].z}"></a-curve-point>
+                    `;
+                    document.getElementById('myScene').appendChild(homeCurve);
+                    // Calculate distance between current position and home position
                     var distance = Math.sqrt(
-                        Math.pow(targetPosition.x - position.x, 2) +
-                        Math.pow(targetPosition.y - position.y, 2) +
-                        Math.pow(targetPosition.z - position.z, 2)
+                        Math.pow(position.x, 2) +
+                        Math.pow(position.y + 0.02, 2) +
+                        Math.pow(position.z, 2)
                     );
 
-                    // Set the duration of the movement animation (adjust the speed as needed)
+                    // Set animation duration based on distance (adjust the factor as needed)
                     var duration = Math.max(1000, distance * 100); // At least 1000 milliseconds
+                    // Animate the camera along the home curve
+                    cc.setAttribute('alongpath', {
+                        curve: '#homeCurve',
+                        dur: duration,
+                        loop: false
+                    });
 
-                    // Define a function to update the position gradually
-                    function moveTowardsTarget() {
-                        var step = 0.01; // Adjust step size as needed
-                        if (position.x < targetPosition.x) position.x += step;
-                        else if (position.x > targetPosition.x) position.x -= step;
-                        if (position.y < targetPosition.y) position.y += step;
-                        else if (position.y > targetPosition.y) position.y -= step;
-                        if (position.z < targetPosition.z) position.z += step;
-                        else if (position.z > targetPosition.z) position.z -= step;
-
-                        // Update the position attribute of the drone
+                    setTimeout(function(){
+                        document.getElementById('myScene').removeChild(homeCurve);
+                        cc.removeAttribute('alongpath');
+                        console.log(player_home[player].x, player_home[player].y, player_home[player].z);
+                        position.x = position.x - position.x + player_home[player].x;
+                        position.y = position.y - position.y + player_home[player].y;
+                        position.z = position.z - position.z + player_home[player].z;
                         cc.setAttribute('position', position);
-
-                        // If the drone has reached the target position, stop the animation
-                        if (Math.abs(position.x - targetPosition.x) < step &&
-                            Math.abs(position.y - targetPosition.y) < step &&
-                            Math.abs(position.z - targetPosition.z) < step) {
-                            clearInterval(animationInterval);
-                        }
-                    }
-
-                    // Start the animation
-                    var animationInterval = setInterval(moveTowardsTarget, 10); // Run the animation loop every 10 milliseconds
+                        myposition = mycamera.getAttribute('position');
+                    }, duration);
                     break;
                 case 'collison':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     collisonHandled = true;
                     var ypos = Math.floor(position.y);
                     console.log(ypos);
@@ -474,8 +490,9 @@
                         collisionHandled = false;
                     }, 10000); // Reset after 10 second
                     break;
-                
                 case 'rotate':
+                    var cc = document.getElementById(player);
+                    position = cc.getAttribute("position");
                     // Get Current Rotation
                     var initialPosition = cc.getAttribute('position');
                     var initialRotation = cc.getAttribute('rotation');
