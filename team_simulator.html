@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Drone Simulator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/0.7.1/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
     <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
@@ -17,83 +17,82 @@
 
 <body>
     <a-scene id="myScene" physics="debug: true">
-    <img id="texture-wall" src="/assets/arrow-left.png">
-    <img id="texture-floor" src="/assets/floor-texture-1.jpg">
-    <a-entity id="CollisonText"></a-entity>
-    <a-box id="wall-one" 
-          static-body material="src: #texture-wall" 
-          depth="1" width="4" height="1"></a-box>
-    <a-cylinder id="end-cap"
-          static-body color="#444444" 
-          depth="1.1" width="1.1" height="2"
-          radius="0.5"></a-cylinder>
-    <a-sky id="sky" color="#0000ff"></a-sky>
-    <a-box id="center" 
-          position="0 0 0"
-          color="red" 
-          depth="0.5" width="0.5" height="10"></a-box>
-    <a-box static-body 
-          depth="0.25" height="1" width="1" 
-          position="-20 9.8 20"
-          rotation="-90 0 0"
-          color="tomato"></a-box>
-    <a-entity id="maze1" 
-          maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 1 2 4 E 5;' 
-          position='0 0.5 0'
-          rotation='0 0 0' class="collidable"></a-entity>
+        <a-assets>
+            <img id="texture-wall" src="/assets/arrow-left.png">
+            <img id="texture-floor" src="/assets/floor-texture-1.jpg">
+        </a-assets>
 
-      <a-entity id="maze2" 
-          maze='size: 7 3; wall: #wall-one; cap: #end-cap; open: W 2 N 2 6;' 
-          position='30 0.5 0'
-          rotation='0 45 0' class="collidable"></a-entity>
+        <a-box id="wall-one" 
+              static-body material="src: #texture-wall" 
+              depth="1" width="4" height="1"></a-box>
+        <a-cylinder id="end-cap"
+              static-body color="#444444" 
+              depth="1.1" width="1.1" height="2"
+              radius="0.5"></a-cylinder>
+        <a-sky id="sky" color="#0000ff"></a-sky>
+        <a-box id="center" 
+              position="0 0 0"
+              color="red" 
+              depth="0.5" width="0.5" height="10"></a-box>
+        <a-box static-body 
+              depth="0.25" height="1" width="1" 
+              position="-20 9.8 20"
+              rotation="-90 0 0"
+              color="tomato"></a-box>
+        <a-entity id="maze1" 
+              maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 1 2 4 E 5;' 
+              position='0 0.5 0'
+              rotation='0 0 0' class="collidable"></a-entity>
 
-      <a-entity id="maze3A" 
-          maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 4;' 
-          position='25 0.5 -30' class="collidable"></a-entity>
+        <a-entity id="maze2" 
+              maze='size: 7 3; wall: #wall-one; cap: #end-cap; open: W 2 N 2 6;' 
+              position='30 0.5 0'
+              rotation='0 45 0' class="collidable"></a-entity>
 
-      <a-entity id="maze3B" 
-          maze='size: 5 6; wall: #wall-one; cap: #end-cap 0.4;' 
-          position='25 4 -30' class="collidable"></a-entity>
+        <a-entity id="maze3A" 
+              maze='size: 5 6; wall: #wall-one; cap: #end-cap; open: S 0 N 4;' 
+              position='25 0.5 -30' class="collidable"></a-entity>
+
+        <a-entity id="maze3B" 
+              maze='size: 5 6; wall: #wall-one; cap: #end-cap 0.4;' 
+              position='25 4 -30' class="collidable"></a-entity>
           
-      <a-entity id="maze4" 
-          maze='size: 4 5; wall: #wall-one; cap: #end-cap;' 
-          position='10 0.5 30' class="collidable"></a-entity>
+        <a-entity id="maze4" 
+              maze='size: 4 5; wall: #wall-one; cap: #end-cap;' 
+              position='10 0.5 30' class="collidable"></a-entity>
           
-       <a-entity id="maze5" 
-          maze='size: 4 5;' 
-          position='-30 0.5 -5' class="collidable"></a-entity>
-        <a-entity id="ocean" ocean="density: 20; width: 50; depth: 50; speed: 4"
-          material="color: #9CE3F9; opacity: 0.75; metalness: 0; roughness: 1"
-          rotation="-90 0 0"></a-entity>
-        <a-entity id="ocean" ocean="density: 20; width: 50; depth: 50; speed: 4"
-          material="color: #9CE3F9; opacity: 0.75; metalness: 0; roughness: 1"
-          rotation="-90 0 0"></a-entity>
+        <a-entity id="maze5" 
+              maze='size: 4 5;' 
+              position='-30 0.5 -5' class="collidable"></a-entity>
+
+        
         <a-simple-sun-sky sun-position="1 0.4 0"></a-simple-sun-sky>
         <a-grid id="ground" width="2000" height="2000" static-body material="src: #texture-floor"></a-grid>
         <a-sky id="sky" color="blue"></a-sky>
         <a-plane id="floor" static-body height="1000" width="1000" position="0 -0.02 0" color="black" rotation="-90 0 0"></a-plane>
-        <a-camera id="myCamera" position="0 -0.02 0" raycaster="objects: .collidable">
+
+        <a-camera id="myCamera" position="0 -0.2 0" raycaster="objects: .collidable">
             <a-cursor intersection-spawn="event: click; mixin: voxel">
-                <a-text id="playerName" value="Your Player Name" position="0 0.2 0" color="#ffffff"></a-text>
-                <a-entity id="drone" position="0 0 0">
-                    <!-- Main body of the drone (rectangle) -->
-                    <a-box width="0.8" height="0.1" depth="0.5" color="grey" position="0 -0.15 0"></a-box>
-                    
-                    <!-- Vertical legs -->
-                    <a-cylinder height="0.6" radius="0.02" color="grey" position="0.4 -0.3 0.25"></a-cylinder>
-                    <a-cylinder height="0.6" radius="0.02" color="grey" position="-0.4 -0.3 0.25"></a-cylinder>
-                    <a-cylinder height="0.6" radius="0.02" color="grey" position="0.4 -0.3 -0.25"></a-cylinder>
-                    <a-cylinder height="0.6" radius="0.02" color="grey" position="-0.4 -0.3 -0.25"></a-cylinder>
+                <a-text id="playerName" value="Your Player Name" position="0 0.4 0" color="#ffffff"></a-text>
+            <a-entity id="drone" position="0 0 0">    
+                <!-- Left stick-like box -->
+                <a-box id="left-stick" rotation="-90 0 0" position="-0.4 0 0" width="0.2" height="0.5" depth="0.2" color="green"></a-box>
                 
-                    <!-- Fans -->
-                    <!-- Front fan -->
-                    <a-cylinder id="front-fan1" height="0.05" radius="0.1" color="blue" rotation="20 0 0" position="0.2 0 0.3"></a-cylinder>
-                    <a-cylinder id="front-fan2" height="0.05" radius="0.1" color="blue" rotation="20 0 0" position="-0.2 0 0.3"></a-cylinder>
-                    <!-- Rear fan -->
-                    <a-cylinder id="rear-fan1" height="0.05" radius="0.1" color="blue" rotation="-20 0 0" position="-0.2 0 -0.3"></a-cylinder>
-                    <a-cylinder id="rear-fan2" height="0.05" radius="0.1" color="blue" rotation="-20 0 0" position="0.2 0 -0.3"></a-cylinder>
-                </a-entity>
+                <!-- Right stick-like box -->
+                <a-box id="right-stick" rotation="-90 0 0" position="0.4 0 0" width="0.2" height="0.5" depth="0.2" color="green"></a-box>
                 
+                <!-- Fans -->
+                <a-box id="fan1" rotation="-90 -90 0" animation="property: rotation; to: -90 270 0; easing: linear; dur: 1000; loop: true" position="0.4 0.1 -0.25" width="0.1" height="0.7" depth="0.05" color="green"></a-box> <!-- Fan 1 -->
+                <a-box id="fan2" rotation="-90 -90 0" animation="property: rotation; to: -90 270 0; easing: linear; dur: 1000; loop: true" position="-0.4 0.1 -0.25" width="0.1" height="0.7" depth="0.05" color="green"></a-box> <!-- Fan 2 -->
+                <a-box id="fan3" animation="property: rotation; to: -90 -270 0; easing: linear; dur: 1000; loop: true" rotation="-90 -90 0" position="-0.4 0.1 0.1" width="0.1" height="0.7" depth="0.05" color="green"></a-box> <!-- Fan 3 -->
+                <a-box id="fan4" animation="property: rotation; to: -90 270 0; easing: linear; dur: 1000; loop: true" rotation="-90 -90 0" position="0.4 0.1 0.1" width="0.1" height="0.7" depth="0.05" color="green"></a-box> <!-- Fan 4 -->
+                
+                <!-- Bottom -->
+                <a-box id="bottom" width="0.8" height="0.1" depth="0.5" color="grey" position="0 -0.1 0"></a-box>
+                
+                <!-- Camera -->
+               
+            </a-entity>
             </a-cursor>
         </a-camera>
     </a-scene>
@@ -120,17 +119,20 @@
             // Update color of the main body
             document.getElementById('drone').querySelector('a-box').setAttribute('color', color);
             // Update color of the fans
-            document.getElementById('front-fan1').setAttribute('color', color);
-            document.getElementById('front-fan2').setAttribute('color', color);
-            document.getElementById('rear-fan1').setAttribute('color', color);
-            document.getElementById('rear-fan2').setAttribute('color', color);
+            document.getElementById('fan1').setAttribute('color', color);
+            document.getElementById('fan2').setAttribute('color', color);
+            document.getElementById('fan3').setAttribute('color', color);
+            document.getElementById('fan4').setAttribute('color', color);
+            document.getElementById('left-stick').setAttribute('color', color);
+            document.getElementById('right-stick').setAttribute('color', color);
+            document.getElementById('bottom').setAttribute('color', color);
         }
         fetch('/getcolor')
         .then(response => response.json())
         .then(data => {
             // Extract color from data (assuming data is in JSON format)
             player_color = data.color;
-
+            console.log(player_color);
             changeDroneColor(player_color);
         })
         .catch(error => {
@@ -190,63 +192,96 @@
                 console.log("New Player Found");
                 const cameraElement = document.createElement('a-entity');
                 cameraElement.setAttribute('id', playerName);
-                cameraElement.setAttribute('position', `${playerPosition.x} ${playerPosition.y} ${playerPosition.z}`);
                 cameraElement.setAttribute('raycaster', 'objects: .collidable');
                 // Create a-cursor element as a child of a-camera
                 const cursorElement = document.createElement('a-cursor');
                 cursorElement.setAttribute('intersection-spawn', 'event: click; mixin: voxel');
 
-                // Create a new a-entity for the drone
+                // Append all boxes to a parent entity (e.g., scene)
                 const droneEntity = document.createElement('a-entity');
                 droneEntity.setAttribute('id', 'drone');
                 droneEntity.setAttribute('position', '0 0 0');
+                // Create a new a-entity for the drone
+                // Create left stick-like box
+                const leftStick = document.createElement('a-box');
+                leftStick.setAttribute('id', 'left-stick');
+                leftStick.setAttribute('rotation', '-90 0 0');
+                leftStick.setAttribute('position', '-0.4 0 0');
+                leftStick.setAttribute('width', '0.2');
+                leftStick.setAttribute('height', '0.5');
+                leftStick.setAttribute('depth', '0.2');
+                leftStick.setAttribute('color', playerPos.color);
 
-                // Main body of the drone (rectangle)
-                const droneBody = document.createElement('a-box');
-                droneBody.setAttribute('width', '0.8');
-                droneBody.setAttribute('height', '0.1');
-                droneBody.setAttribute('depth', '0.5');
-                droneBody.setAttribute('color', playerPos.color);
-                droneBody.setAttribute('position', '0 -0.15 0');
+                // Create right stick-like box
+                const rightStick = document.createElement('a-box');
+                rightStick.setAttribute('id', 'right-stick');
+                rightStick.setAttribute('rotation', '-90 0 0');
+                rightStick.setAttribute('position', '0.4 0 0');
+                rightStick.setAttribute('width', '0.2');
+                rightStick.setAttribute('height', '0.5');
+                rightStick.setAttribute('depth', '0.2');
+                rightStick.setAttribute('color', playerPos.color);
 
-                // Append main body of the drone to the drone entity
-                droneEntity.appendChild(droneBody);
+                // Create fan boxes
+                const fan1 = document.createElement('a-box');
+                fan1.setAttribute('id', 'fan1');
+                fan1.setAttribute('rotation', '-90 -90 0');
+                fan1.setAttribute('animation', 'property: rotation; to: -90 270 0; easing: linear; dur: 1000; loop: true');
+                fan1.setAttribute('position', '0.4 0.1 -0.25');
+                fan1.setAttribute('width', '0.1');
+                fan1.setAttribute('height', '0.7');
+                fan1.setAttribute('depth', '0.05');
+                fan1.setAttribute('color', playerPos.color);
 
-                // Vertical legs
-                const legPositions = [
-                    { x: 0.4, z: 0.25 },
-                    { x: -0.4, z: 0.25 },
-                    { x: 0.4, z: -0.25 },
-                    { x: -0.4, z: -0.25 }
-                ];
+                const fan2 = document.createElement('a-box');
+                fan2.setAttribute('id', 'fan2');
+                fan2.setAttribute('rotation', '-90 -90 0');
+                fan2.setAttribute('animation', 'property: rotation; to: -90 270 0; easing: linear; dur: 1000; loop: true');
+                fan2.setAttribute('position', '-0.4 0.1 -0.25');
+                fan2.setAttribute('width', '0.1');
+                fan2.setAttribute('height', '0.7');
+                fan2.setAttribute('depth', '0.05');
+                fan2.setAttribute('color', playerPos.color);
 
-                legPositions.forEach(position => {
-                    const leg = document.createElement('a-cylinder');
-                    leg.setAttribute('height', '0.6');
-                    leg.setAttribute('radius', '0.02');
-                    leg.setAttribute('color', 'grey');
-                    leg.setAttribute('position', `${position.x} -0.3 ${position.z}`);
-                    droneEntity.appendChild(leg);
-                });
+                const fan3 = document.createElement('a-box');
+                fan3.setAttribute('id', 'fan3');
+                fan3.setAttribute('rotation', '-90 -90 0');
+                fan3.setAttribute('animation', 'property: rotation; to: -90 270 0; easing: linear; dur: 1000; loop: true');
+                fan3.setAttribute('position', '-0.4 0.1 0.1');
+                fan3.setAttribute('width', '0.1');
+                fan3.setAttribute('height', '0.7');
+                fan3.setAttribute('depth', '0.05');
+                fan3.setAttribute('color', playerPos.color);
 
-                // Fans
-                const fanData = [
-                    { id: 'front-fan1', position: '0.2 0 0.3', rotation: '20 0 0' },
-                    { id: 'front-fan2', position: '-0.2 0 0.3', rotation: '20 0 0' },
-                    { id: 'rear-fan1', position: '-0.2 0 -0.3', rotation: '-20 0 0' },
-                    { id: 'rear-fan2', position: '0.2 0 -0.3', rotation: '-20 0 0' }
-                ];
+                const fan4 = document.createElement('a-box');
+                fan4.setAttribute('id', 'fan4');
+                fan4.setAttribute('rotation', '-90 -90 0');
+                fan4.setAttribute('animation', 'property: rotation; to: -90 270 0; easing: linear; dur: 1000; loop: true');
+                fan4.setAttribute('position', '0.4 0.1 0.1');
+                fan4.setAttribute('width', '0.1');
+                fan4.setAttribute('height', '0.7');
+                fan4.setAttribute('depth', '0.05');
+                fan4.setAttribute('color', playerPos.color);
 
-                fanData.forEach(data => {
-                    const fan = document.createElement('a-cylinder');
-                    fan.setAttribute('id', data.id);
-                    fan.setAttribute('height', '0.05');
-                    fan.setAttribute('radius', '0.1');
-                    fan.setAttribute('color', playerPos.color);
-                    fan.setAttribute('rotation', data.rotation);
-                    fan.setAttribute('position', data.position);
-                    droneEntity.appendChild(fan);
-                });
+                
+                const bottom = document.createElement('a-box');
+                bottom.setAttribute('id', 'right-stick');
+                bottom.setAttribute('position', '0 -0.1 0');
+                bottom.setAttribute('width', '0.8');
+                bottom.setAttribute('height', '0.1');
+                bottom.setAttribute('depth', '0.5');
+                bottom.setAttribute('color', playerPos.color);
+                
+                droneEntity.appendChild(leftStick);
+                droneEntity.appendChild(rightStick);
+                droneEntity.appendChild(fan1);
+                droneEntity.appendChild(fan2);
+                droneEntity.appendChild(fan3);
+                droneEntity.appendChild(fan4);
+                droneEntity.appendChild(bottom);
+                
+                // Append drone entity to the scene or a parent entity in your A-Frame scene
+                // For example: document.querySelector('a-scene').appendChild(droneEntity);
 
                 
                 const textElement = document.createElement('a-text');
@@ -257,7 +292,8 @@
                 cursorElement.appendChild(textElement);
                 cursorElement.appendChild(droneEntity);
                 cameraElement.appendChild(cursorElement);
-
+                cameraElement.setAttribute('position', `${playerPosition.x} ${playerPosition.y} ${playerPosition.z}`);
+                
                 // Append a-camera element to the scene
                 document.getElementById('myScene').appendChild(cameraElement);
                 // Listen for the 'loaded' event on cameraElement
@@ -491,7 +527,7 @@
                     }, 10000); // Reset after 10 second
                     break;
                 case 'rotate':
-                    var cc = document.getElementById(player);
+                var cc = document.getElementById(player);
                     position = cc.getAttribute("position");
                     // Get Current Rotation
                     var initialPosition = cc.getAttribute('position');
@@ -513,11 +549,7 @@
                         currentRotation += 1;
 
                         // Set new rotation
-                        cc.setAttribute('rotation', {
-                            x: 0,
-                            y: currentRotation,
-                            z: 0
-                        });
+                        cc.setAttribute('animation', "property: rotation; to: 0 360 0; loop: false; dur: 10000");
 
                         // Request next frame and store the request ID
                         animationFrameId = requestAnimationFrame(rotateCamera);
@@ -531,6 +563,7 @@
                         // Stop rotating the camera
                         cancelAnimationFrame(animationFrameId);
                         resetCamera();
+                        cc.removeAttribute("animation");
                     }, 10000); // 10 seconds
                     break;    
             }
