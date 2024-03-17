@@ -91,7 +91,7 @@
         const socket = io(socketURL, {
             transports: ['websocket'],
         });
-
+        console.log(socketURL);
         // Function to send WebSocket signal
         function sendWebSocketSignal(direction) {
             socket.emit('message', direction);

@@ -79,7 +79,7 @@
 
                     if (data.message === 'Team and Code Verified') {
                         console.log(teamName);
-                        const socketURL = `wss://idrone-controller.onrender.com/code/socket/${teamName}/${verificationCode}`;
+                        const socketURL = `ws://localhost:3000/code/socket/${teamName}/${verificationCode}`;
                         const username = name;
                         sessionStorage.setItem('socketURL', socketURL);
                         sessionStorage.setItem('playerName', name);

@@ -78,7 +78,7 @@
             .then(response => response.json())
             .then(data => {
                 var generatedCode = data.code;
-                const socketURL = `wss://idrone-controller.onrender.com/code/socket/${document.getElementById('teamInput').value}/${generatedCode}`;
+                const socketURL = `ws://localhost:3000/code/socket/${document.getElementById('teamInput').value}/${generatedCode}`;
                 console.log(socketURL)
                 sessionStorage.setItem('socketURL', socketURL);
                 document.getElementById('controllerPage').setAttribute('href', `/team/verify/controller`);
