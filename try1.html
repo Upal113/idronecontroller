@@ -67,7 +67,7 @@
                 .then(response => response.json())
                 .then(data => {
                     var generatedCode = data.code;
-                    const socketURL = `ws://localhost:3000/code/socket/${generatedCode}`;
+                    const socketURL = `ws://35.174.7.98:3000/code/socket/${generatedCode}`;
                     console.log(socketURL)
                     sessionStorage.setItem('socketURL', socketURL);
                     displayMessage('Generated code: ' + generatedCode);
