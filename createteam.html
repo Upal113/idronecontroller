@@ -78,7 +78,7 @@
             .then(response => response.json())
             .then(data => {
                 var generatedCode = data.code;
-                const socketURL = `ws://35.174.7.98:3000/code/socket/${document.getElementById('teamInput').value}/${generatedCode}`;
+                const socketURL = `ws://3.208.21.138:3000/code/socket/${document.getElementById('teamInput').value}/${generatedCode}`;
                 console.log(socketURL)
                 sessionStorage.setItem('socketURL', socketURL);
                 document.getElementById('controllerPage').setAttribute('href', `/team/verify/controller`);
